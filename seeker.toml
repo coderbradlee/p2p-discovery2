@@ -1,0 +1,11 @@
+coin = "eth"
+
+blockNumber = 5000
+
+[log]
+	dir="./"
+	name="seeker.log"
+	console=false
+	num=1000
+	size=3000000
+	level="info"
