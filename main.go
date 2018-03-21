@@ -12,9 +12,9 @@ import (
 	"github.com/ethereum/go-ethereum/p2p"
 	"github.com/ethereum/go-ethereum/p2p/discover"
 	"math/big"
-	"net"
+	// "net"
 	"sync"
-	"time"
+	// "time"
 )
 
 var cfg *util.Config
@@ -40,9 +40,13 @@ func init() {
 	// initialize()
 }
 
-const ua = "manspreading"
-const ver = "1.0.0"
-
+const {
+	ua = "manspreading"
+	ver = "1.0.0"
+	upstreamUrl = "127.0.0.1:30304"
+	listenAddr = "127.0.0.1:36666"
+	privkey = ""
+}
 // statusData is the network packet for the status message.
 type statusData struct {
 	ProtocolVersion uint32
@@ -73,9 +77,7 @@ type proxy struct {
 }
 
 var pxy *proxy
-var upstreamUrl = "127.0.0.1:30304"
-var listenAddr = "127.0.0.1:36666"
-var privkey = ""
+
 
 func test2() {
 	var nodekey *ecdsa.PrivateKey
