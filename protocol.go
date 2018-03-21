@@ -1,13 +1,14 @@
 package main
 
 import (
+	// "golang.org/x/text"
+	// "encoding/hex"
 	"fmt"
-	"io"
-
 	"github.com/ethereum/go-ethereum/eth"
 	"github.com/ethereum/go-ethereum/p2p"
 	"github.com/ethereum/go-ethereum/p2p/discover"
-	"github.com/ethereum/go-ethereum/rlp"
+	"io"
+	// "github.com/ethereum/go-ethereum/rlp"
 )
 
 func newManspreadingProtocol() p2p.Protocol {
@@ -28,17 +29,16 @@ func newManspreadingProtocol() p2p.Protocol {
 }
 
 func handle(p *p2p.Peer, rw p2p.MsgReadWriter) error {
-	fmt.Println("Run called")
-
+	// fmt.Println("Run called")
 	for {
-		fmt.Println("Waiting for msg...")
+		// fmt.Println("Waiting for msg...")
 		msg, err := rw.ReadMsg()
-		fmt.Println("Got a msg from: ", fromWhom(p.ID().String()))
+
 		if err != nil {
-			fmt.Println("readMsg err: ", err)
+			// fmt.Println("readMsg err: ", err)
 
 			if err == io.EOF {
-				fmt.Println(fromWhom(p.ID().String()), " has dropped its connection...")
+				// fmt.Println(fromWhom(p.ID().String()), " has dropped its connection...")
 				pxy.lock.Lock()
 				if p.ID() == pxy.upstreamNode.ID {
 					pxy.upstreamConn = nil
@@ -50,7 +50,11 @@ func handle(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 
 			return err
 		}
-		fmt.Println("msg.Code: ", msg.Code)
+		if msg.Code == eth.TxMsg {
+			return err
+		}
+		// fmt.Println("Got a msg from: ", fromWhom(p.ID().String()[:8]))
+		// fmt.Println("msg.Code: ", formateCode(msg.Code))
 
 		if msg.Code == eth.StatusMsg { // handshake
 			var myMessage statusData
@@ -60,11 +64,11 @@ func handle(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 				return err
 			}
 
-			fmt.Println("ProtocolVersion: ", myMessage.ProtocolVersion)
-			fmt.Println("NetworkId:       ", myMessage.NetworkId)
-			fmt.Println("TD:              ", myMessage.TD)
-			fmt.Println("CurrentBlock:    ", myMessage.CurrentBlock.Hex())
-			fmt.Println("GenesisBlock:    ", myMessage.GenesisBlock.Hex())
+			// fmt.Println("ProtocolVersion: ", myMessage.ProtocolVersion)
+			// fmt.Println("NetworkId:       ", myMessage.NetworkId)
+			// fmt.Println("TD:              ", myMessage.TD)
+			// fmt.Println("CurrentBlock:    ", myMessage.CurrentBlock.Hex())
+			// fmt.Println("GenesisBlock:    ", myMessage.GenesisBlock.Hex())
 
 			pxy.lock.Lock()
 			if p.ID() == pxy.upstreamNode.ID {
@@ -88,12 +92,15 @@ func handle(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 				return err
 			}
 		} else if msg.Code == eth.NewBlockMsg {
+			fmt.Println("msg.Code: ", formateCode(msg.Code))
 			var myMessage newBlockData
 			err = msg.Decode(&myMessage)
 			if err != nil {
 				fmt.Println("decode newBlockMsg err: ", err)
+				return err
 			}
-
+			// fmt.Println("newblockmsg:", myMessage.Block.Number(), " coinbase:", myMessage.Block.Coinbase().Hex(), " extra:", string(myMessage.Block.Extra()[:]))
+			fmt.Println("newblockmsg:", myMessage.Block.Number().Text(10), " coinbase:", myMessage.Block.Coinbase().Hex())
 			pxy.lock.Lock()
 			if p.ID() == pxy.upstreamNode.ID {
 				pxy.upstreamState.CurrentBlock = myMessage.Block.Hash()
@@ -102,13 +109,24 @@ func handle(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 			pxy.lock.Unlock()
 
 			// need to re-encode msg
-			size, r, err := rlp.EncodeToReader(myMessage)
-			if err != nil {
-				fmt.Println("encoding newBlockMsg err: ", err)
+			// size, r, err := rlp.EncodeToReader(myMessage)
+			// if err != nil {
+			// 	fmt.Println("encoding newBlockMsg err: ", err)
+			// }
+			// relay(p, p2p.Msg{Code: eth.NewBlockMsg, Size: uint32(size), Payload: r})
+
+		} else if msg.Code == eth.NewBlockHashesMsg {
+			var announces newBlockHashesData
+			if err := msg.Decode(&announces); err != nil {
+				fmt.Println("decoding NewBlockHashesMsg err: ", err)
+				return err
 			}
-			relay(p, p2p.Msg{Code: eth.NewBlockMsg, Size: uint32(size), Payload: r})
-		} else {
-			relay(p, msg)
+			// Mark the hashes as present at the remote node
+			for _, block := range announces {
+				// p.MarkBlock(block.Hash)
+				fmt.Println("NewBlockHashesMsg:", block.Number)
+			}
+
 		}
 	}
 
@@ -143,8 +161,53 @@ func (pxy *proxy) upstreamAlive() bool {
 
 func fromWhom(nodeId string) string {
 	if nodeId == pxy.upstreamNode.ID.String() {
-		return "upstream"
+		return "upstream:" + nodeId
 	} else {
-		return "downstream"
+		return "downstream:" + nodeId
 	}
+}
+func formateCode(code uint64) (ret string) {
+	// StatusMsg          = 0x00
+	// 	NewBlockHashesMsg  = 0x01
+	// 	TxMsg              = 0x02
+	// 	GetBlockHeadersMsg = 0x03
+	// 	BlockHeadersMsg    = 0x04
+	// 	GetBlockBodiesMsg  = 0x05
+	// 	BlockBodiesMsg     = 0x06
+	// 	NewBlockMsg        = 0x07
+
+	// 	// Protocol messages belonging to eth/63
+	// 	GetNodeDataMsg = 0x0d
+	// 	NodeDataMsg    = 0x0e
+	// 	GetReceiptsMsg = 0x0f
+	// 	ReceiptsMsg    = 0x10
+	switch code {
+	case eth.StatusMsg:
+		ret = "StatusMsg"
+	case eth.NewBlockHashesMsg:
+		ret = "NewBlockHashesMsg"
+	case eth.TxMsg:
+		ret = "TxMsg"
+	case eth.GetBlockHeadersMsg:
+		ret = "GetBlockHeadersMsg"
+	case eth.BlockHeadersMsg:
+		ret = "BlockHeadersMsg"
+	case eth.GetBlockBodiesMsg:
+		ret = "GetBlockBodiesMsg"
+	case eth.BlockBodiesMsg:
+		ret = "BlockBodiesMsg"
+	case eth.NewBlockMsg:
+		ret = "NewBlockMsg"
+	case eth.GetNodeDataMsg:
+		ret = "GetNodeDataMsg"
+	case eth.NodeDataMsg:
+		ret = "NodeDataMsg"
+	case eth.GetReceiptsMsg:
+		ret = "GetReceiptsMsg"
+	case eth.ReceiptsMsg:
+		ret = "ReceiptsMsg"
+	default:
+		ret = "unknown"
+	}
+	return
 }

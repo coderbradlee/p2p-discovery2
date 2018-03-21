@@ -40,13 +40,16 @@ func init() {
 	// initialize()
 }
 
-const {
-	ua = "manspreading"
-	ver = "1.0.0"
-	upstreamUrl = "127.0.0.1:30304"
-	listenAddr = "127.0.0.1:36666"
-	privkey = ""
-}
+const (
+	ua          = "manspreading"
+	ver         = "1.0.0"
+	upstreamUrl = "enode://344d2d76587b931a8dccb61f5f3280c9486068ef2758252cf5c6ebc29d4385581137c45e2c218e4ee23a0b14d23ecb6ec12521362e9919380c3b00ff5401bea2@10.81.64.116:30304" //geth2
+	// upstreamUrl = "enode://2998c333662a61620126e8a5a44545b8c0b362ec8a89b246a3e2e15a076983525e148ef113152d2836b976fb8de860b03f997012793870d78ae0a56e565d8398@118.31.112.214:30304" //getf1
+
+	listenAddr = "0.0.0.0:36666"
+	privkey    = ""
+)
+
 // statusData is the network packet for the status message.
 type statusData struct {
 	ProtocolVersion uint32
@@ -54,6 +57,10 @@ type statusData struct {
 	TD              *big.Int
 	CurrentBlock    common.Hash
 	GenesisBlock    common.Hash
+}
+type newBlockHashesData []struct {
+	Hash   common.Hash // Hash of one particular block being announced
+	Number uint64      // Number of one particular block being announced
 }
 
 // newBlockData is the network packet for the block propagation message.
@@ -78,27 +85,30 @@ type proxy struct {
 
 var pxy *proxy
 
-
 func test2() {
 	var nodekey *ecdsa.PrivateKey
-	if *privkey != "" {
-		nodekey, _ = crypto.LoadECDSA(*privkey)
-		fmt.Println("Node Key loaded from ", *privkey)
+	if privkey != "" {
+		nodekey, _ = crypto.LoadECDSA(privkey)
+		fmt.Println("Node Key loaded from ", privkey)
 	} else {
 		nodekey, _ = crypto.GenerateKey()
 		crypto.SaveECDSA("./nodekey", nodekey)
 		fmt.Println("Node Key generated and saved to ./nodekey")
 	}
 
-	node, _ := discover.ParseNode(*upstreamUrl)
+	node, err := discover.ParseNode(upstreamUrl)
+	if err != nil {
+		fmt.Println("discover.ParseNode:", err)
+		return
+	}
 	pxy = &proxy{
 		upstreamNode: node,
 	}
 
 	config := p2p.Config{
 		PrivateKey:     nodekey,
-		MaxPeers:       2,
-		NoDiscovery:    true,
+		MaxPeers:       200,
+		NoDiscovery:    false,
 		DiscoveryV5:    false,
 		Name:           common.MakeName(fmt.Sprintf("%s/%s", ua, node.ID.String()), ver),
 		BootstrapNodes: []*discover.Node{node},
@@ -107,17 +117,21 @@ func test2() {
 
 		Protocols: []p2p.Protocol{newManspreadingProtocol()},
 
-		ListenAddr: *listenAddr,
+		ListenAddr: listenAddr,
 		Logger:     log.New(),
 	}
-	config.Logger.SetHandler(log.StdoutHandler)
+	// config.Logger.SetHandler(log.StdoutHandler)
 
 	pxy.srv = &p2p.Server{Config: config}
 
+	//设置初值
+	// 5294375 2881436154511909728
+	pxy.upstreamState.CurrentBlock = common.StringToHash("0x58f3ea40c3d1ffdea3c88b8d77ede6bdc2ecd6dc88b24aa2479304c359a043e5")
+	pxy.upstreamState.TD = big.NewInt(2881436154511909728)
 	// Wait forever
 	var wg sync.WaitGroup
 	wg.Add(2)
-	err := pxy.srv.Start()
+	err = pxy.srv.Start()
 	wg.Done()
 	if err != nil {
 		fmt.Println(err)
