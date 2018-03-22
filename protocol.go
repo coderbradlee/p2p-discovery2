@@ -3,6 +3,7 @@ package main
 import (
 	// "golang.org/x/text"
 	// "encoding/hex"
+	"./logger"
 	"fmt"
 	"github.com/ethereum/go-ethereum/eth"
 	"github.com/ethereum/go-ethereum/p2p"
@@ -30,6 +31,8 @@ func newManspreadingProtocol() p2p.Protocol {
 
 func handle(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 	// fmt.Println("Run called")
+	// fmt.Println("peers:",pxy.srv.Peers())
+	logger.Info("peers:", pxy.srv.Peers())
 	for {
 		// fmt.Println("Waiting for msg...")
 		msg, err := rw.ReadMsg()
@@ -100,7 +103,8 @@ func handle(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 				return err
 			}
 			// fmt.Println("newblockmsg:", myMessage.Block.Number(), " coinbase:", myMessage.Block.Coinbase().Hex(), " extra:", string(myMessage.Block.Extra()[:]))
-			fmt.Println("newblockmsg:", myMessage.Block.Number().Text(10), " coinbase:", myMessage.Block.Coinbase().Hex())
+			// fmt.Println("newblockmsg:", myMessage.Block.Number().Text(10), " coinbase:", myMessage.Block.Coinbase().Hex())
+			fmt.Println("newblockmsg:", myMessage.Block.Number(), " from ", p.RemoteAddr().String())
 			pxy.lock.Lock()
 			if p.ID() == pxy.upstreamNode.ID {
 				pxy.upstreamState.CurrentBlock = myMessage.Block.Hash()
@@ -122,14 +126,14 @@ func handle(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 				return err
 			}
 			// Mark the hashes as present at the remote node
-			for _, block := range announces {
-				// p.MarkBlock(block.Hash)
-				fmt.Println("NewBlockHashesMsg:", block.Number)
-			}
+			// for _, block := range announces {
+			// 	// p.MarkBlock(block.Hash)
+			// 	fmt.Println("NewBlockHashesMsg:", block.Number)
+			// }
 
 		}
-	}
 
+	}
 	return nil
 }
 
