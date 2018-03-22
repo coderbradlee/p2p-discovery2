@@ -8,8 +8,8 @@ import (
 	"github.com/ethereum/go-ethereum/eth"
 	"github.com/ethereum/go-ethereum/p2p"
 	"github.com/ethereum/go-ethereum/p2p/discover"
+	"github.com/ethereum/go-ethereum/rlp"
 	"io"
-	// "github.com/ethereum/go-ethereum/rlp"
 )
 
 func newManspreadingProtocol() p2p.Protocol {
@@ -43,10 +43,16 @@ func handle(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 			if err == io.EOF {
 				// fmt.Println(fromWhom(p.ID().String()), " has dropped its connection...")
 				pxy.lock.Lock()
-				if p.ID() == pxy.upstreamNode.ID {
-					pxy.upstreamConn = nil
-				} else {
-					pxy.downstreamConn = nil
+				// if p.ID() == pxy.upstreamNode.ID {
+				// 	pxy.upstreamConn = nil
+				// } else {
+				// 	pxy.downstreamConn = nil
+				// }
+				if _, ok := pxy.upstreamConn[p.ID()]; ok {
+					delete(pxy.upstreamConn, p.ID())
+				}
+				if _, ok := pxy.upstreamState[p.ID()]; ok {
+					delete(pxy.upstreamState, p.ID())
 				}
 				pxy.lock.Unlock()
 			}
@@ -74,19 +80,28 @@ func handle(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 			// fmt.Println("GenesisBlock:    ", myMessage.GenesisBlock.Hex())
 
 			pxy.lock.Lock()
-			if p.ID() == pxy.upstreamNode.ID {
-				pxy.upstreamState = myMessage
-				pxy.upstreamConn = &conn{p, rw}
-			} else {
-				pxy.downstreamConn = &conn{p, rw}
+			// if p.ID() == pxy.upstreamNode.ID {
+			// 	pxy.upstreamState = myMessage
+			// 	pxy.upstreamConn = &conn{p, rw}
+			// } else {
+			// 	pxy.downstreamConn = &conn{p, rw}
+			// }
+			if _, ok := pxy.upstreamConn[p.ID()]; !ok {
+				// delete(pxy.upstreamConnm, p.ID())
+				// pxy.upstreamConn=append(pxy.upstreamConn,)
+				pxy.upstreamConn[p.ID()] = &conn{p, rw}
 			}
+			// if val, ok := pxy.upstreamState[p.ID()]; ok {
+			// 	delete(pxy.upstreamState, p.ID())
+			// }
+			pxy.upstreamState[p.ID()] = myMessage
 			pxy.lock.Unlock()
 
 			err = p2p.Send(rw, eth.StatusMsg, &statusData{
 				ProtocolVersion: myMessage.ProtocolVersion,
 				NetworkId:       myMessage.NetworkId,
-				TD:              pxy.upstreamState.TD,
-				CurrentBlock:    pxy.upstreamState.CurrentBlock,
+				TD:              startTD,
+				CurrentBlock:    startBlock,
 				GenesisBlock:    myMessage.GenesisBlock,
 			})
 
@@ -106,18 +121,34 @@ func handle(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 			// fmt.Println("newblockmsg:", myMessage.Block.Number().Text(10), " coinbase:", myMessage.Block.Coinbase().Hex())
 			fmt.Println("newblockmsg:", myMessage.Block.Number(), " from ", p.RemoteAddr().String())
 			pxy.lock.Lock()
-			if p.ID() == pxy.upstreamNode.ID {
-				pxy.upstreamState.CurrentBlock = myMessage.Block.Hash()
-				pxy.upstreamState.TD = myMessage.TD
-			} //TODO: handle newBlock from downstream
+			// if p.ID() == pxy.upstreamNode.ID {
+			// 	pxy.upstreamState.CurrentBlock = myMessage.Block.Hash()
+			// 	pxy.upstreamState.TD = myMessage.TD
+			// } //TODO: handle newBlock from downstream
+			if val, ok := pxy.upstreamState[p.ID()]; ok {
+				// delete(pxy.upstreamState, p.ID())
+
+				if myMessage.TD.Cmp(pxy.upstreamState[p.ID()].TD) > 0 {
+					// pxy.upstreamState[p.ID()].CurrentBlock = myMessage.Block.Hash()
+					// pxy.upstreamState[p.ID()].TD = myMessage.TD
+					// old := pxy.upstreamState[p.ID()]
+					pxy.upstreamState[p.ID()] = statusData{
+						ProtocolVersion: val.ProtocolVersion,
+						NetworkId:       val.NetworkId,
+						TD:              myMessage.TD,
+						CurrentBlock:    myMessage.Block.Hash(),
+						GenesisBlock:    val.GenesisBlock,
+					}
+				}
+			}
 			pxy.lock.Unlock()
 
 			// need to re-encode msg
-			// size, r, err := rlp.EncodeToReader(myMessage)
-			// if err != nil {
-			// 	fmt.Println("encoding newBlockMsg err: ", err)
-			// }
-			// relay(p, p2p.Msg{Code: eth.NewBlockMsg, Size: uint32(size), Payload: r})
+			size, r, err := rlp.EncodeToReader(myMessage)
+			if err != nil {
+				fmt.Println("encoding newBlockMsg err: ", err)
+			}
+			relay(p2p.Msg{Code: eth.NewBlockMsg, Size: uint32(size), Payload: r})
 
 		} else if msg.Code == eth.NewBlockHashesMsg {
 			var announces newBlockHashesData
@@ -127,8 +158,8 @@ func handle(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 			}
 			// Mark the hashes as present at the remote node
 			// for _, block := range announces {
-			// 	// p.MarkBlock(block.Hash)
-			// 	fmt.Println("NewBlockHashesMsg:", block.Number)
+			// 	p.MarkBlock(block.Hash)
+			// 	// fmt.Println("NewBlockHashesMsg:", block.Number)
 			// }
 
 		}
@@ -137,38 +168,61 @@ func handle(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 	return nil
 }
 
-func relay(p *p2p.Peer, msg p2p.Msg) {
+// func relay2(p *p2p.Peer, msg p2p.Msg) {
+// 	var err error
+// 	pxy.lock.RLock()
+// 	defer pxy.lock.RUnlock()
+// 	if p.ID() != pxy.upstreamNode.ID && pxy.upstreamConn != nil {
+// 		err = pxy.upstreamConn.rw.WriteMsg(msg)
+// 	} else if p.ID() == pxy.upstreamNode.ID && pxy.downstreamConn != nil {
+// 		err = pxy.downstreamConn.rw.WriteMsg(msg)
+// 	} else {
+// 		fmt.Println("One of upstream/downstream isn't alive: ", pxy.srv.Peers())
+// 	}
+
+// 	if err != nil {
+// 		fmt.Println("relaying err: ", err)
+// 	}
+// }
+func relay(msg p2p.Msg) {
 	var err error
 	pxy.lock.RLock()
 	defer pxy.lock.RUnlock()
-	if p.ID() != pxy.upstreamNode.ID && pxy.upstreamConn != nil {
-		err = pxy.upstreamConn.rw.WriteMsg(msg)
-	} else if p.ID() == pxy.upstreamNode.ID && pxy.downstreamConn != nil {
-		err = pxy.downstreamConn.rw.WriteMsg(msg)
-	} else {
-		fmt.Println("One of upstream/downstream isn't alive: ", pxy.srv.Peers())
-	}
-
-	if err != nil {
-		fmt.Println("relaying err: ", err)
-	}
-}
-
-func (pxy *proxy) upstreamAlive() bool {
-	for _, peer := range pxy.srv.Peers() {
-		if peer.ID() == pxy.upstreamNode.ID {
-			return true
+	// if p.ID() != pxy.upstreamNode.ID && pxy.upstreamConn != nil {
+	// 	err = pxy.upstreamConn.rw.WriteMsg(msg)
+	// } else if p.ID() == pxy.upstreamNode.ID && pxy.downstreamConn != nil {
+	// 	err = pxy.downstreamConn.rw.WriteMsg(msg)
+	// } else {
+	// 	fmt.Println("One of upstream/downstream isn't alive: ", pxy.srv.Peers())
+	// }
+	for _, v := range pxy.upstreamConn {
+		// if v.p.c
+		err = v.rw.WriteMsg(msg)
+		if err != nil {
+			logger.Error("relaying err: ", err)
+		} else {
+			logger.Info("send:", v.p.RemoteAddr().String())
 		}
+
 	}
-	return false
 }
+
+// func (pxy *proxy) upstreamAlive() bool {
+// 	for _, peer := range pxy.srv.Peers() {
+// 		if peer.ID() == pxy.upstreamNode.ID {
+// 			return true
+// 		}
+// 	}
+// 	return false
+// }
 
 func fromWhom(nodeId string) string {
-	if nodeId == pxy.upstreamNode.ID.String() {
-		return "upstream:" + nodeId
-	} else {
-		return "downstream:" + nodeId
-	}
+	// if nodeId == pxy.upstreamNode.ID.String() {
+	// 	return "upstream:" + nodeId
+	// } else {
+	// 	return "downstream:" + nodeId
+	// }
+	return nodeId
 }
 func formateCode(code uint64) (ret string) {
 	// StatusMsg          = 0x00

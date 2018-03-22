@@ -48,6 +48,12 @@ const (
 
 	listenAddr = "0.0.0.0:36666"
 	privkey    = ""
+	//设置初值
+	// 5294375 2881436154511909728
+)
+var (
+	startBlock = common.StringToHash("0x58f3ea40c3d1ffdea3c88b8d77ede6bdc2ecd6dc88b24aa2479304c359a043e5")
+	startTD = big.NewInt(2881436154511909728)
 )
 
 // statusData is the network packet for the status message.
@@ -75,12 +81,13 @@ type conn struct {
 }
 
 type proxy struct {
-	lock           sync.RWMutex
-	upstreamNode   *discover.Node
-	upstreamConn   *conn
-	downstreamConn *conn
-	upstreamState  statusData
-	srv            *p2p.Server
+	lock         sync.RWMutex
+	upstreamNode *discover.Node
+	// upstreamConn *conn
+	upstreamConn map[discover.NodeID]*conn
+	// downstreamConn *conn
+	upstreamState map[discover.NodeID]statusData
+	srv           *p2p.Server
 }
 
 var pxy *proxy
@@ -102,7 +109,9 @@ func test2() {
 		return
 	}
 	pxy = &proxy{
-		upstreamNode: node,
+		upstreamNode:  node,
+		upstreamConn:  make(map[discover.NodeID]*conn, 0),
+		upstreamState: make(map[discover.NodeID]statusData, 0),
 	}
 
 	config := p2p.Config{
@@ -124,10 +133,6 @@ func test2() {
 
 	pxy.srv = &p2p.Server{Config: config}
 
-	//设置初值
-	// 5294375 2881436154511909728
-	pxy.upstreamState.CurrentBlock = common.StringToHash("0x58f3ea40c3d1ffdea3c88b8d77ede6bdc2ecd6dc88b24aa2479304c359a043e5")
-	pxy.upstreamState.TD = big.NewInt(2881436154511909728)
 	// Wait forever
 	var wg sync.WaitGroup
 	wg.Add(2)
