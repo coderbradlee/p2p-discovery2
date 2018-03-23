@@ -119,7 +119,7 @@ func handle(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 			}
 			// fmt.Println("newblockmsg:", myMessage.Block.Number(), " coinbase:", myMessage.Block.Coinbase().Hex(), " extra:", string(myMessage.Block.Extra()[:]))
 			// fmt.Println("newblockmsg:", myMessage.Block.Number().Text(10), " coinbase:", myMessage.Block.Coinbase().Hex())
-			fmt.Println("newblockmsg:", myMessage.Block.Number(), " from ", p.RemoteAddr().String())
+			fmt.Println("newblockmsg:", myMessage.Block.Number().Text(10), " from ", p.RemoteAddr().String())
 			pxy.lock.Lock()
 			// if p.ID() == pxy.upstreamNode.ID {
 			// 	pxy.upstreamState.CurrentBlock = myMessage.Block.Hash()

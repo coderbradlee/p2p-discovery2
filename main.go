@@ -51,9 +51,10 @@ const (
 	//设置初值
 	// 5294375 2881436154511909728
 )
+
 var (
 	startBlock = common.StringToHash("0x58f3ea40c3d1ffdea3c88b8d77ede6bdc2ecd6dc88b24aa2479304c359a043e5")
-	startTD = big.NewInt(2881436154511909728)
+	startTD    = big.NewInt(2881436154511909728)
 )
 
 // statusData is the network packet for the status message.
@@ -143,7 +144,13 @@ func test2() {
 	}
 	wg.Wait()
 }
+func test() {
+	i := new(big.Int)
+	i.SetString("0e", 16) // octal
+	fmt.Println(i.Uint64())
+}
 func main() {
+	test()
 	test2()
 	c := make(chan int, 1)
 
