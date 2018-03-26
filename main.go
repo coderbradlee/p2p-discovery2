@@ -14,7 +14,7 @@ import (
 	"math/big"
 	// "net"
 	"sync"
-	// "time"
+	"time"
 )
 
 var cfg *util.Config
@@ -55,6 +55,7 @@ const (
 var (
 	startBlock = common.StringToHash("0x58f3ea40c3d1ffdea3c88b8d77ede6bdc2ecd6dc88b24aa2479304c359a043e5")
 	startTD    = big.NewInt(2881436154511909728)
+	genesis    = common.StringToHash("0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3")
 )
 
 // statusData is the network packet for the status message.
@@ -66,8 +67,8 @@ type statusData struct {
 	GenesisBlock    common.Hash
 }
 type newBlockHashesData []struct {
-	Hash   common.Hash // Hash of one particular block being announced
-	Number uint64      // Number of one particular block being announced
+	Hash   common.Hash   // Hash of one particular block being announced
+	Number uint64        // Number of one particular block being announced
 	header *types.Header // Header of the block partially reassembled (new protocol)	重新组装的区块头
 	time   time.Time     // Timestamp of the announcement
 
@@ -87,12 +88,16 @@ type conn struct {
 
 type proxy struct {
 	lock         sync.RWMutex
-	upstreamNode *discover.Node
+	upstreamNode *discover.Node //第一个连接的node
 	// upstreamConn *conn
-	upstreamConn map[discover.NodeID]*conn
+	upstreamConn map[discover.NodeID]*conn //后面自动连接的peer
 	// downstreamConn *conn
-	upstreamState map[discover.NodeID]statusData
-	srv           *p2p.Server
+	// upstreamState map[discover.NodeID]statusData
+	bestState statusData
+	srv       *p2p.Server
+	// maxtd         *big.Int
+	// bestHash      common.Hash
+	bestHei uint64
 }
 
 var pxy *proxy
@@ -114,9 +119,16 @@ func test2() {
 		return
 	}
 	pxy = &proxy{
-		upstreamNode:  node,
-		upstreamConn:  make(map[discover.NodeID]*conn, 0),
-		upstreamState: make(map[discover.NodeID]statusData, 0),
+		upstreamNode: node,
+		upstreamConn: make(map[discover.NodeID]*conn, 0),
+		// upstreamState: make(map[discover.NodeID]statusData, 0),
+		bestState: statusData{
+			TD:           startTD,
+			CurrentBlock: startBlock,
+			GenesisBlock: genesis,
+		},
+		// maxtd:startTD,
+		// bestHash:startBlock
 	}
 
 	config := p2p.Config{

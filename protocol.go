@@ -1,6 +1,7 @@
 package main
 
 import (
+	// "hash"
 	// "golang.org/x/text"
 	// "encoding/hex"
 	"./logger"
@@ -51,9 +52,9 @@ func handle(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 				if _, ok := pxy.upstreamConn[p.ID()]; ok {
 					delete(pxy.upstreamConn, p.ID())
 				}
-				if _, ok := pxy.upstreamState[p.ID()]; ok {
-					delete(pxy.upstreamState, p.ID())
-				}
+				// if _, ok := pxy.upstreamState[p.ID()]; ok {
+				// 	delete(pxy.upstreamState, p.ID())
+				// }
 				pxy.lock.Unlock()
 			}
 
@@ -86,23 +87,40 @@ func handle(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 			// } else {
 			// 	pxy.downstreamConn = &conn{p, rw}
 			// }
+			fmt.Println("genesis:", myMessage.GenesisBlock.Hex())
 			if _, ok := pxy.upstreamConn[p.ID()]; !ok {
 				// delete(pxy.upstreamConnm, p.ID())
 				// pxy.upstreamConn=append(pxy.upstreamConn,)
-				pxy.upstreamConn[p.ID()] = &conn{p, rw}
+
+				if myMessage.TD.Cmp(pxy.bestState.TD) > 0 && myMessage.GenesisBlock.Hex() == pxy.bestState.GenesisBlock.Hex() {
+					pxy.upstreamConn[p.ID()] = &conn{p, rw}
+					// pxy.maxtd = myMessage.TD
+					// pxy.bestHash = myMessage.CurrentBlock
+					// pxy.bestState.TD=myMessage.TD
+					pxy.bestState = statusData{
+						ProtocolVersion: myMessage.ProtocolVersion,
+						NetworkId:       myMessage.NetworkId,
+						TD:              myMessage.TD,
+						CurrentBlock:    myMessage.CurrentBlock,
+						GenesisBlock:    myMessage.GenesisBlock,
+					}
+					// fmt.Println("StatusMsg:", myMessage.TD.Text(16), " from ", p.RemoteAddr().String())
+					fmt.Println("StatusMsg:", myMessage, " from ", p.RemoteAddr().String())
+				}
+
 			}
 			// if val, ok := pxy.upstreamState[p.ID()]; ok {
 			// 	delete(pxy.upstreamState, p.ID())
 			// }
-			pxy.upstreamState[p.ID()] = myMessage
-			pxy.lock.Unlock()
-
+			// pxy.upstreamState[p.ID()] = myMessage
+			// temptd := pxy.maxtd
+			// temphash := pxy.bestHash
 			err = p2p.Send(rw, eth.StatusMsg, &statusData{
 				ProtocolVersion: myMessage.ProtocolVersion,
 				NetworkId:       myMessage.NetworkId,
-				TD:              startTD,
-				CurrentBlock:    startBlock,
-				GenesisBlock:    myMessage.GenesisBlock,
+				TD:              myMessage.TD,
+				CurrentBlock:    myMessage.CurrentBlock,
+				GenesisBlock:    genesis,
 			})
 
 			if err != nil {
@@ -110,7 +128,13 @@ func handle(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 				return err
 			}
 		} else if msg.Code == eth.NewBlockMsg {
-			fmt.Println("msg.Code: ", formateCode(msg.Code))
+			pxy.lock.Lock()
+			// defer pxy.lock.Unlock()
+			if _, ok := pxy.upstreamConn[p.ID()]; !ok {
+				pxy.lock.Unlock()
+				return nil
+			}
+			// fmt.Println("msg.Code: ", formateCode(msg.Code))
 			var myMessage newBlockData
 			err = msg.Decode(&myMessage)
 			if err != nil {
@@ -119,30 +143,44 @@ func handle(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 			}
 			// fmt.Println("newblockmsg:", myMessage.Block.Number(), " coinbase:", myMessage.Block.Coinbase().Hex(), " extra:", string(myMessage.Block.Extra()[:]))
 			// fmt.Println("newblockmsg:", myMessage.Block.Number().Text(10), " coinbase:", myMessage.Block.Coinbase().Hex())
-			fmt.Println("newblockmsg:", myMessage.Block.Number().Text(10), " from ", p.RemoteAddr().String())
+			// if myMessage.Block.Number() > startBlock {
+			// if myMessage.TD > startTD {
+			// if myMessage.TD.Cmp(startTD) > 0 {
+			// 	pxy.upstreamConn[p.ID()] = &conn{p, rw}
+			// 	startTD = myMessage.TD
+			// 	startBlock = myMessage.Block.Hash()
+			// 	fmt.Println("newblockmsg:", myMessage.Block.Number().Text(10), " from ", p.RemoteAddr().String())
+			// }
+			// fmt.Println("newblockmsg:", myMessage.Block.Number().Text(10), " from ", p.RemoteAddr().String())
+			// startBlock = myMessage.Block.Number()
+			// startTD = myMessage.TD
+			// }
 			if p.ID() == pxy.upstreamNode.ID {
 				// pxy.upstreamState.CurrentBlock = myMessage.Block.Hash()
 				// pxy.upstreamState.TD = myMessage.TD
 				fmt.Println("newblockmsg:", myMessage.Block.Number().Text(10), " from bootnode", p.RemoteAddr().String())
 			}
-			pxy.lock.Lock()
-			//TODO: handle newBlock from downstream
-			if val, ok := pxy.upstreamState[p.ID()]; ok {
-				// delete(pxy.upstreamState, p.ID())
+			fmt.Println("NewBlockMsg xx:", myMessage.Block.Number(), " from ", p.RemoteAddr().String())
 
-				if myMessage.TD.Cmp(pxy.upstreamState[p.ID()].TD) > 0 {
-					// pxy.upstreamState[p.ID()].CurrentBlock = myMessage.Block.Hash()
-					// pxy.upstreamState[p.ID()].TD = myMessage.TD
-					// old := pxy.upstreamState[p.ID()]
-					pxy.upstreamState[p.ID()] = statusData{
-						ProtocolVersion: val.ProtocolVersion,
-						NetworkId:       val.NetworkId,
-						TD:              myMessage.TD,
-						CurrentBlock:    myMessage.Block.Hash(),
-						GenesisBlock:    val.GenesisBlock,
-					}
+			//TODO: handle newBlock from downstream
+			// if _, ok := pxy.upstreamConn[p.ID()]; ok {
+			// delete(pxy.upstreamState, p.ID())
+
+			if myMessage.TD.Cmp(pxy.bestState.TD) > 0 {
+				// pxy.upstreamState[p.ID()].CurrentBlock = myMessage.Block.Hash()
+				// pxy.upstreamState[p.ID()].TD = myMessage.TD
+				// old := pxy.upstreamState[p.ID()]
+				pxy.bestState = statusData{
+					// ProtocolVersion: val.ProtocolVersion,
+					// NetworkId:       val.NetworkId,
+					TD:           myMessage.TD,
+					CurrentBlock: myMessage.Block.Hash(),
+					GenesisBlock: genesis,
 				}
+				pxy.bestHei = myMessage.Block.Number().Uint64()
+				fmt.Println("NewBlockMsg:", myMessage.Block.Number(), " from ", p.RemoteAddr().String())
 			}
+			// }
 			pxy.lock.Unlock()
 
 			// need to re-encode msg
@@ -153,19 +191,29 @@ func handle(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 			relay(p2p.Msg{Code: eth.NewBlockMsg, Size: uint32(size), Payload: r})
 
 		} else if msg.Code == eth.NewBlockHashesMsg {
+			pxy.lock.Lock()
+			// defer pxy.lock.Unlock()
+			if _, ok := pxy.upstreamConn[p.ID()]; !ok {
+				pxy.lock.Unlock()
+				return nil
+			}
 			var announces newBlockHashesData
 			if err := msg.Decode(&announces); err != nil {
 				fmt.Println("decoding NewBlockHashesMsg err: ", err)
 				return err
 			}
 			// Mark the hashes as present at the remote node
+
+			// pxy.lock.Lock()
 			for _, block := range announces {
-				// p.MarkBlock(block.Hash)
-				fmt.Println("NewBlockHashesMsg:", block.Number," from ",block.origin, " p:", p.RemoteAddr().String())
+				fmt.Println("NewBlockHashesMsg xx:", block.Number, " p:", p.RemoteAddr().String(), " Caps:", p.Caps())
+				if block.Number > pxy.bestHei {
+					fmt.Println("NewBlockHashesMsg:", block.Number, " p:", p.RemoteAddr().String(), " Caps:", p.Caps())
+					pxy.bestHei = block.Number
+				}
 			}
-
+			pxy.lock.Unlock()
 		}
-
 	}
 	return nil
 }
