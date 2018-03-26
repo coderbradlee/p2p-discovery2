@@ -120,11 +120,13 @@ func handle(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 			// fmt.Println("newblockmsg:", myMessage.Block.Number(), " coinbase:", myMessage.Block.Coinbase().Hex(), " extra:", string(myMessage.Block.Extra()[:]))
 			// fmt.Println("newblockmsg:", myMessage.Block.Number().Text(10), " coinbase:", myMessage.Block.Coinbase().Hex())
 			fmt.Println("newblockmsg:", myMessage.Block.Number().Text(10), " from ", p.RemoteAddr().String())
+			if p.ID() == pxy.upstreamNode.ID {
+				// pxy.upstreamState.CurrentBlock = myMessage.Block.Hash()
+				// pxy.upstreamState.TD = myMessage.TD
+				fmt.Println("newblockmsg:", myMessage.Block.Number().Text(10), " from bootnode", p.RemoteAddr().String())
+			}
 			pxy.lock.Lock()
-			// if p.ID() == pxy.upstreamNode.ID {
-			// 	pxy.upstreamState.CurrentBlock = myMessage.Block.Hash()
-			// 	pxy.upstreamState.TD = myMessage.TD
-			// } //TODO: handle newBlock from downstream
+			//TODO: handle newBlock from downstream
 			if val, ok := pxy.upstreamState[p.ID()]; ok {
 				// delete(pxy.upstreamState, p.ID())
 
@@ -157,10 +159,10 @@ func handle(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 				return err
 			}
 			// Mark the hashes as present at the remote node
-			// for _, block := range announces {
-			// 	p.MarkBlock(block.Hash)
-			// 	// fmt.Println("NewBlockHashesMsg:", block.Number)
-			// }
+			for _, block := range announces {
+				// p.MarkBlock(block.Hash)
+				fmt.Println("NewBlockHashesMsg:", block.Number," from ",block.origin, " p:", p.RemoteAddr().String())
+			}
 
 		}
 

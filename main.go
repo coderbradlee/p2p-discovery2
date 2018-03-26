@@ -68,6 +68,10 @@ type statusData struct {
 type newBlockHashesData []struct {
 	Hash   common.Hash // Hash of one particular block being announced
 	Number uint64      // Number of one particular block being announced
+	header *types.Header // Header of the block partially reassembled (new protocol)	重新组装的区块头
+	time   time.Time     // Timestamp of the announcement
+
+	origin string
 }
 
 // newBlockData is the network packet for the block propagation message.
