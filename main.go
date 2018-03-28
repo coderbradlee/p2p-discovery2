@@ -127,7 +127,7 @@ func (pxy *proxy) Start() {
 				if !ok {
 					break
 				}
-				if beststate.TD.Cmp(pxy.bestState.TD) > 0 {
+				if beststate.TD.Cmp(pxy.bestState.TD) > 0&&beststate.GenesisBlock.Hex()== genesis.Hex(){
 					pxy.bestState = beststate
 				}
 			case <-tick:
