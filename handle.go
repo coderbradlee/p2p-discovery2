@@ -5,7 +5,7 @@ import (
 	// "golang.org/x/text"
 	// "encoding/hex"
 	"./logger"
-	// "fmt"
+	"fmt"
 	"github.com/ethereum/go-ethereum/eth"
 	"github.com/ethereum/go-ethereum/p2p"
 	// "github.com/ethereum/go-ethereum/p2p/discover"
@@ -49,7 +49,8 @@ func (pxy *proxy) handleStatus(p *p2p.Peer, msg p2p.Msg, rw p2p.MsgReadWriter) (
 		NetworkId:       myMessage.NetworkId,
 		TD:              myMessage.TD,
 		CurrentBlock:    myMessage.CurrentBlock,
-		GenesisBlock:    myMessage.GenesisBlock,
+		// GenesisBlock:    myMessage.GenesisBlock,
+		GenesisBlock: genesis,
 		// ProtocolVersion: pxy.bestState.ProtocolVersion,
 		// NetworkId:       pxy.bestState.NetworkId,
 		// TD:              pxy.bestState.TD,
@@ -66,17 +67,17 @@ func (pxy *proxy) handleStatus(p *p2p.Peer, msg p2p.Msg, rw p2p.MsgReadWriter) (
 }
 func (pxy *proxy) handleNewBlockMsg(p *p2p.Peer, msg p2p.Msg) (err error) {
 	// fmt.Println("NewBlockMsg")
-	// // {
-	// // 	pxy.lock.RLock()
-	// // 	_, ok := pxy.upstreamConn[p.ID()]
-	// // 	pxy.lock.RUnlock()
-	// // 	// pxy.lock.Lock()
-	// // 	// defer pxy.lock.Unlock()
-	// // 	if !ok {
-	// // 		fmt.Println("NewBlockMsg:no id")
-	// // 		return nil
-	// // 	}
-	// // }
+	{
+		pxy.lock.RLock()
+		_, ok := pxy.upstreamConn[p.ID()]
+		pxy.lock.RUnlock()
+		// pxy.lock.Lock()
+		// defer pxy.lock.Unlock()
+		if !ok {
+			fmt.Println("NewBlockMsg:no id")
+			return nil
+		}
+	}
 
 	// // fmt.Println("NewBlockMsg2")
 	// // fmt.Println("msg.Code: ", formateCode(msg.Code))
@@ -128,16 +129,16 @@ func (pxy *proxy) handleNewBlockMsg(p *p2p.Peer, msg p2p.Msg) (err error) {
 func (pxy *proxy) handleNewBlockHashesMsg(p *p2p.Peer, msg p2p.Msg) (err error) {
 	// fmt.Println("NewBlockHashesMsg")
 	// pxy.lock.Lock()
-	// {
-	// 	pxy.lock.RLock()
-	// 	_, ok := pxy.upstreamConn[p.ID()]
-	// 	pxy.lock.RUnlock()
-	// 	// defer pxy.lock.Unlock()
-	// 	if !ok {
-	// 		fmt.Println("NewBlockHashesMsg:no id")
-	// 		return nil
-	// 	}
-	// }
+	{
+		pxy.lock.RLock()
+		_, ok := pxy.upstreamConn[p.ID()]
+		pxy.lock.RUnlock()
+		// defer pxy.lock.Unlock()
+		if !ok {
+			fmt.Println("NewBlockHashesMsg:no id")
+			return nil
+		}
+	}
 	// fmt.Println("NewBlockHashesMsg2")
 	var announces newBlockHashesData
 	if err := msg.Decode(&announces); err != nil {
