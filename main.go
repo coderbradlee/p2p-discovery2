@@ -218,12 +218,13 @@ func test2() {
 	wg.Wait()
 }
 func test() {
-	i := new(big.Int)
-	i.SetString("0e", 16) // octal
-	fmt.Println(i.Uint64())
+	// i := new(big.Int)
+	// i.SetString("0e", 16) // octal
+	// fmt.Println(i.Uint64())
+
 }
 func main() {
-	test()
+	// test()
 	test2()
 	c := make(chan int, 1)
 
