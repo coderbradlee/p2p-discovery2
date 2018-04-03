@@ -127,12 +127,17 @@ func (pxy *proxy) Start() {
 				if !ok {
 					break
 				}
-				if beststate.TD.Cmp(pxy.bestState.TD) > 0&&beststate.GenesisBlock.Hex()== genesis.Hex(){
+				if beststate.TD.Cmp(pxy.bestState.TD) > 0 && beststate.GenesisBlock.Hex() == genesis.Hex() {
 					pxy.bestState = beststate
 				}
 			case <-tick:
 				fmt.Println("besthei:", pxy.bestHeiAndPeer.bestHei, " from:", pxy.bestHeiAndPeer.p)
 				fmt.Println("beststate:", pxy.bestState.TD)
+				fmt.Println("len peers:", pxy.srv.PeerCount(), " time:", time.Now().Format("2006-01-02 15:04:05"))
+				for _, p := range pxy.srv.Peers() {
+					_, td := p.Head()
+					fmt.Println(p, " td:", td)
+				}
 			}
 		}
 	}()
@@ -179,16 +184,16 @@ func test2() {
 			continue
 		}
 		// pxy.srv.AddPeer(old)
-		bootstrapNodes=append(bootstrapNodes,old)
+		bootstrapNodes = append(bootstrapNodes, old)
 	}
 	config := p2p.Config{
-		PrivateKey:     nodekey,
-		MaxPeers:       200,
-		NoDiscovery:    false,
-		DiscoveryV5:    false,
-		Name:           common.MakeName(fmt.Sprintf("%s/%s", ua, node.ID.String()), ver),
+		PrivateKey:  nodekey,
+		MaxPeers:    200,
+		NoDiscovery: false,
+		DiscoveryV5: false,
+		Name:        common.MakeName(fmt.Sprintf("%s/%s", ua, node.ID.String()), ver),
 		// BootstrapNodes: []*discover.Node{node},
-		BootstrapNodes:bootstrapNodes,
+		BootstrapNodes: bootstrapNodes,
 		StaticNodes:    []*discover.Node{node},
 		TrustedNodes:   []*discover.Node{node},
 
