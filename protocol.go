@@ -40,7 +40,7 @@ func (pxy *proxy) handle(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 
 				if _, ok := pxy.upstreamConn[p.ID()]; ok {
 					delete(pxy.upstreamConn, p.ID())
-					fmt.Println("delete:", p.ID())
+					// fmt.Println("delete:", p.ID())
 				}
 				pxy.lock.Unlock()
 			}
@@ -54,12 +54,15 @@ func (pxy *proxy) handle(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 			pxy.handleNewBlockMsg(p, msg)
 		case eth.NewBlockHashesMsg:
 			pxy.handleNewBlockHashesMsg(p, msg)
+		case eth.BlockHeadersMsg:
+			pxy.handleBlockHeadersMsg(p, msg)
 		default:
 			break
 		}
 	}
 	return nil
 }
+
 // func handle1(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 // 	logger.Info("peers:", pxy.srv.Peers())
 // 	for {
@@ -420,8 +423,12 @@ func (pxy *proxy) handle(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 // }
 func relay(msg p2p.Msg) {
 	var err error
+	connmap := make(map[discover.NodeID]*conn)
 	pxy.lock.RLock()
-	defer pxy.lock.RUnlock()
+	for key, value := range pxy.upstreamConn {
+		connmap[key] = value
+	}
+	pxy.lock.RUnlock()
 	// if p.ID() != pxy.upstreamNode.ID && pxy.upstreamConn != nil {
 	// 	err = pxy.upstreamConn.rw.WriteMsg(msg)
 	// } else if p.ID() == pxy.upstreamNode.ID && pxy.downstreamConn != nil {
@@ -429,7 +436,7 @@ func relay(msg p2p.Msg) {
 	// } else {
 	// 	fmt.Println("One of upstream/downstream isn't alive: ", pxy.srv.Peers())
 	// }
-	for _, v := range pxy.upstreamConn {
+	for _, v := range connmap {
 		// if v.p.c
 		err = v.rw.WriteMsg(msg)
 		if err != nil {
@@ -439,6 +446,7 @@ func relay(msg p2p.Msg) {
 		}
 
 	}
+
 }
 
 // func (pxy *proxy) upstreamAlive() bool {

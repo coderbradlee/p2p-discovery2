@@ -71,6 +71,11 @@ type statusData struct {
 	CurrentBlock    common.Hash
 	GenesisBlock    common.Hash
 }
+
+func (s *statusData) String() string {
+	return fmt.Sprintf("%v %v %v %v %v", s.ProtocolVersion, s.NetworkId, s.TD.Text(16), s.CurrentBlock.Hex(), s.GenesisBlock.Hex())
+}
+
 type newBlockHashesData []struct {
 	Hash   common.Hash   // Hash of one particular block being announced
 	Number uint64        // Number of one particular block being announced
@@ -103,8 +108,12 @@ type proxy struct {
 	srv           *p2p.Server
 	// maxtd         *big.Int
 	// bestHash      common.Hash
-	bestHeiChan    chan bestHeiPeer
-	bestHeiAndPeer bestHeiPeer
+	bestHeiChan     chan bestHeiPeer
+	bestHeiChan2    chan bestHeiPeer
+	bestHeiAndPeer  bestHeiPeer
+	bestHeiAndPeer2 bestHeiPeer
+	bestHeader      types.Header
+	bestHeaderChan  chan []*types.Header
 }
 type bestHeiPeer struct {
 	bestHei uint64
@@ -123,6 +132,13 @@ func (pxy *proxy) Start() {
 				if hei.bestHei > pxy.bestHeiAndPeer.bestHei {
 					pxy.bestHeiAndPeer = hei
 				}
+			case hei, ok := <-pxy.bestHeiChan2:
+				if !ok {
+					break
+				}
+				if hei.bestHei > pxy.bestHeiAndPeer2.bestHei {
+					pxy.bestHeiAndPeer2 = hei
+				}
 			case beststate, ok := <-pxy.bestStateChan:
 				if !ok {
 					break
@@ -130,14 +146,23 @@ func (pxy *proxy) Start() {
 				if beststate.TD.Cmp(pxy.bestState.TD) > 0 && beststate.GenesisBlock.Hex() == genesis.Hex() {
 					pxy.bestState = beststate
 				}
-			case <-tick:
-				fmt.Println("besthei:", pxy.bestHeiAndPeer.bestHei, " from:", pxy.bestHeiAndPeer.p)
-				fmt.Println("beststate:", pxy.bestState.TD)
-				fmt.Println("len peers:", pxy.srv.PeerCount(), " time:", time.Now().Format("2006-01-02 15:04:05"))
-				for _, p := range pxy.srv.Peers() {
-					_, td := p.Head()
-					fmt.Println(p, " td:", td)
+			case bestheaders, ok := <-pxy.bestHeaderChan:
+				// []*types.Header
+				if !ok {
+					break
 				}
+				for _, h := range bestheaders {
+					if h.Number.Cmp(pxy.bestHeader.Number) > 0 {
+						pxy.bestHeader = *h
+					}
+				}
+			case <-tick:
+				fmt.Println("newblockmsg besthei:", pxy.bestHeiAndPeer.bestHei, " from:", pxy.bestHeiAndPeer.p)
+				fmt.Println("NewBlockHashesMsg besthei:", pxy.bestHeiAndPeer2.bestHei, " from:", pxy.bestHeiAndPeer2.p)
+				fmt.Println("newblockmsg beststate:", pxy.bestState.String())
+				// fmt.Println("bestheader number:", pxy.bestHeader.Number)
+				fmt.Println("len peers:", pxy.srv.PeerCount(), " time:", time.Now().Format("2006-01-02 15:04:05"))
+				fmt.Println(" ")
 			}
 		}
 	}()
@@ -173,8 +198,10 @@ func test2() {
 			CurrentBlock:    startBlock,
 			GenesisBlock:    genesis,
 		},
-		bestStateChan: make(chan statusData),
-		bestHeiChan:   make(chan bestHeiPeer),
+		bestStateChan:  make(chan statusData),
+		bestHeiChan:    make(chan bestHeiPeer),
+		bestHeiChan2:    make(chan bestHeiPeer),
+		bestHeaderChan: make(chan []*types.Header),
 	}
 	bootstrapNodes := make([]*discover.Node, 0)
 	for _, boot := range MainnetBootnodes {
@@ -188,7 +215,7 @@ func test2() {
 	}
 	config := p2p.Config{
 		PrivateKey:  nodekey,
-		MaxPeers:    200,
+		MaxPeers:    300,
 		NoDiscovery: false,
 		DiscoveryV5: false,
 		Name:        common.MakeName(fmt.Sprintf("%s/%s", ua, node.ID.String()), ver),
