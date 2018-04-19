@@ -201,6 +201,7 @@ func test2() {
 	pxy = &proxy{
 		upstreamNode: node,
 		upstreamConn: make(map[discover.NodeID]*conn, 0),
+		allPeer:make(map[discover.NodeID]*p2p.Peer, 0),
 		// upstreamState: make(map[discover.NodeID]statusData, 0),
 		bestState: statusData{
 			ProtocolVersion: gversion,
