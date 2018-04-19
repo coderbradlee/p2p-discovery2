@@ -313,6 +313,18 @@ func (p *Peer) Handshake(network uint64, td *big.Int, head common.Hash, genesis 
 
 type errCode int
 
+const (
+	ErrMsgTooLarge = iota
+	ErrDecode
+	ErrInvalidMsgCode
+	ErrProtocolVersionMismatch
+	ErrNetworkIdMismatch
+	ErrGenesisBlockMismatch
+	ErrNoStatusMsg
+	ErrExtraStatusMsg
+	ErrSuspendedPeer
+)
+
 func errResp(code errCode, format string, v ...interface{}) error {
 	return fmt.Errorf("%v - %v", code, fmt.Sprintf(format, v...))
 }
