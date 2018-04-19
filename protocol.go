@@ -32,6 +32,28 @@ func newManspreadingProtocol() p2p.Protocol {
 
 func (pxy *proxy) handle(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 	// logger.Info("peers:", pxy.srv.Peers())
+	//先处理dao分叉的问题
+	DAOForkBlock:=big.NewInt(1920000)
+	if daoBlock := DAOForkBlock; daoBlock != nil {
+		// Request the peer's DAO fork header for extra-data validation
+		if err := p.RequestHeadersByNumber(daoBlock.Uint64(), 1, 0, false); err != nil {
+			fmt.Println("RequestHeadersByNumber:",err)
+			return err
+		}
+		// Start a timer to disconnect if the peer doesn't reply in time
+		daoChallengeTimeout:=15 * time.Second
+		p.forkDrop = time.AfterFunc(daoChallengeTimeout, func() {
+			logger.Error("Timed out DAO fork-check, dropping")
+			// pm.removePeer(p.id)
+		})
+		// Make sure it's cleaned up if the peer dies off
+		defer func() {
+			if p.forkDrop != nil {
+				p.forkDrop.Stop()
+				p.forkDrop = nil
+			}
+		}()
+	}
 	for {
 		msg, err := rw.ReadMsg()
 		if err != nil {
