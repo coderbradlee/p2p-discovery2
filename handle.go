@@ -32,7 +32,7 @@ func (pxy *proxy) handleStatus(p *p2p.Peer, msg p2p.Msg, rw p2p.MsgReadWriter) (
 	// NewPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter)
 	pp := ethpeer.NewPeer(myMessage.ProtocolVersion, p, rw)
 	pxy.ethpeerset.Register(pp)
-	pxy.ethpeerset.Peer(p.id).SetHead(myMessage.CurrentBlock, myMessage.TD)
+	pxy.ethpeerset.Peer(p.ID()).SetHead(myMessage.CurrentBlock, myMessage.TD)
 	pxy.lock.Unlock()
 	logger.Info("add:", p.ID())
 	// 	pxy.bestState = statusData{
