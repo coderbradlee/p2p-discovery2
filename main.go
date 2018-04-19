@@ -1,6 +1,7 @@
 package main
 
 import (
+	ethpeer "./ethpeer"
 	"./logger"
 	util "./utils"
 	"crypto/ecdsa"
@@ -111,7 +112,9 @@ type proxy struct {
 	upstreamConn map[discover.NodeID]*conn //后面自动连接的peer
 	// downstreamConn *conn
 	// upstreamState map[discover.NodeID]statusData
-	allPeer       map[discover.NodeID]*p2p.Peer
+	// allPeer       map[discover.NodeID]*p2p.Peer
+	ethpeerset *ethpeer.PeerSet
+	NewPeerSet
 	bestState     statusData
 	bestStateChan chan statusData
 	srv           *p2p.Server
@@ -188,19 +191,21 @@ func (pxy *proxy) pullBestBlock() {
 	// 	number  = pxy.bestHeader.Number.Uint64()
 	// 	td      = pxy.bestState.TD
 	// )
-	var (
-		bestPeer *peer
-		bestTd   *big.Int
-	)
-	for _, p := range pxy.allPeer {
-		// if err := p.Handshake(pxy.bestState.NetworkId, td, hash, genesis.Hash()); err != nil {
-		// 	logger.Error("Ethereum handshake failed:", err)
-		// }
-		if _, td := p.Head(); bestPeer == nil || td.Cmp(bestTd) > 0 {
-			bestPeer, bestTd = p, td
-		}
-	}
-	fmt.Println("bestpeer:", bestPeer)
+	// var (
+	// 	bestPeer *p2p.peer
+	// 	bestTd   *big.Int
+	// )
+	// for _, p := range pxy.allPeer {
+	// 	newPeer
+	// 	// if err := p.Handshake(pxy.bestState.NetworkId, td, hash, genesis.Hash()); err != nil {
+	// 	// 	logger.Error("Ethereum handshake failed:", err)
+	// 	// }
+
+	// 	if _, td := p.Head(); bestPeer == nil || td.Cmp(bestTd) > 0 {
+	// 		bestPeer, bestTd = p, td
+	// 	}
+	// }
+	fmt.Println("bestpeer:", pxy.ethpeerset.BestPeer().P)
 }
 
 var pxy *proxy
@@ -225,7 +230,8 @@ func test2() {
 	pxy = &proxy{
 		upstreamNode: node,
 		upstreamConn: make(map[discover.NodeID]*conn, 0),
-		allPeer:      make(map[discover.NodeID]*p2p.Peer, 0),
+		// allPeer:      make(map[discover.NodeID]*p2p.Peer, 0),
+		ethpeerset:ethpeer.NewPeerSet()
 		// upstreamState: make(map[discover.NodeID]statusData, 0),
 		bestState: statusData{
 			ProtocolVersion: gversion,
