@@ -298,9 +298,8 @@ func test() {
 		}
 	} else {
 		cfg := discover.Config{
-			PrivateKey:   nodeKey,
+			PrivateKey:   nodekey,
 			AnnounceAddr: realaddr,
-			NetRestrict:  restrictList,
 		}
 		if _, err := discover.ListenUDP(conn, cfg); err != nil {
 			logger.Error("%v", err)
