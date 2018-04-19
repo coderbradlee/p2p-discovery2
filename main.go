@@ -111,6 +111,7 @@ type proxy struct {
 	upstreamConn map[discover.NodeID]*conn //后面自动连接的peer
 	// downstreamConn *conn
 	// upstreamState map[discover.NodeID]statusData
+	allPeer       map[discover.NodeID]*p2p.Peer
 	bestState     statusData
 	bestStateChan chan statusData
 	srv           *p2p.Server
@@ -170,7 +171,9 @@ func (pxy *proxy) Start() {
 				fmt.Println("newblockmsg beststate:", pxy.bestState.String())
 				// fmt.Println("bestheader number:", pxy.bestHeader.Number)
 				fmt.Println("len peers:", pxy.srv.PeerCount(), " time:", time.Now().Format("2006-01-02 15:04:05"))
+				fmt.Println("all peers:", pxy.allPeer)
 				fmt.Println(" ")
+
 			}
 		}
 	}()

@@ -27,6 +27,7 @@ func (pxy *proxy) handleStatus(p *p2p.Peer, msg p2p.Msg, rw p2p.MsgReadWriter) (
 	pxy.lock.Lock()
 	// if myMessage.TD.Cmp(pxy.bestState.TD) > 0 {
 	pxy.upstreamConn[p.ID()] = &conn{p, rw}
+	allPeer[p.ID()]=p
 	pxy.lock.Unlock()
 	logger.Info("add:", p.ID())
 	// 	pxy.bestState = statusData{
