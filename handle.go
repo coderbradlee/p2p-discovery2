@@ -48,7 +48,7 @@ func (pxy *proxy) handleStatus(p *p2p.Peer, msg p2p.Msg, rw p2p.MsgReadWriter) (
 	}
 	// pxy.bestHei = myMessage.Block.Number().Uint64()
 	// pxy.bestHeiChan <- myMessage.Block.Number().Uint64()
-	fmt.Println("genesis:",myMessage.GenesisBlock.Hex())
+	// fmt.Println("genesis:",myMessage.GenesisBlock.Hex())
 	err = p2p.Send(rw, eth.StatusMsg, &statusData{
 		ProtocolVersion: myMessage.ProtocolVersion,
 		NetworkId:       myMessage.NetworkId,
