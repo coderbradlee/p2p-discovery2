@@ -349,7 +349,7 @@ func (p *Peer) readStatus(network uint64, status *statusData, genesis common.Has
 	if status.NetworkId != network {
 		return errResp(ErrNetworkIdMismatch, "%d (!= %d)", status.NetworkId, network)
 	}
-	if int(status.ProtocolVersion) != p.version {
+	if status.ProtocolVersion != p.version {
 		return errResp(ErrProtocolVersionMismatch, "%d (!= %d)", status.ProtocolVersion, p.version)
 	}
 	return nil
