@@ -310,8 +310,8 @@ func test() {
 	select {}
 }
 func main() {
-	test()
-	// test2()
+	// test()
+	test2()
 	c := make(chan int, 1)
 
 	<-c
