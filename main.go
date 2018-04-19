@@ -14,15 +14,15 @@ import (
 	"math/big"
 	// "net"
 	"net"
-	"os"
+	// "os"
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/crypto"
+	// "github.com/ethereum/go-ethereum/cmd/utils"
+	// "github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/p2p/discv5"
 	"github.com/ethereum/go-ethereum/p2p/nat"
-	"github.com/ethereum/go-ethereum/p2p/netutil"
+	// "github.com/ethereum/go-ethereum/p2p/netutil"
 )
 
 var cfg *util.Config
@@ -275,6 +275,11 @@ func test() {
 	}
 
 	realaddr := conn.LocalAddr().(*net.UDPAddr)
+	natm, err := nat.Parse("any")
+	if err != nil {
+		logger.Error("-nat: %v", err)
+		return
+	}
 	if natm != nil {
 		if !realaddr.IP.IsLoopback() {
 			go nat.Map(natm, nil, "udp", realaddr.Port, realaddr.Port, "ethereum discovery")
