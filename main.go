@@ -131,6 +131,7 @@ type bestHeiPeer struct {
 
 func (pxy *proxy) Start() {
 	tick := time.Tick(5000 * time.Millisecond)
+	tickPullBestBlock := time.Tick(10000 * time.Millisecond)
 	go func() {
 		for {
 			select {
@@ -171,12 +172,28 @@ func (pxy *proxy) Start() {
 				fmt.Println("newblockmsg beststate:", pxy.bestState.String())
 				// fmt.Println("bestheader number:", pxy.bestHeader.Number)
 				fmt.Println("len peers:", pxy.srv.PeerCount(), " time:", time.Now().Format("2006-01-02 15:04:05"))
-				fmt.Println("all peers:", pxy.allPeer)
+				// fmt.Println("all peers:", pxy.allPeer)
 				fmt.Println(" ")
-
+			case <-tickPullBestBlock:
+				go pxy.pullBestBlock()
 			}
 		}
 	}()
+}
+func (pxy *proxy) pullBestBlock() {
+	var (
+		genesis = pxy.bestState.GenesisBlock
+		head    = pxy.bestHeader
+		hash    = pxy.bestHeader.Hash()
+		number  = pxy.bestHeader.Number.Uint64()
+		td      = pxy.bestState.TD
+	)
+	for _, p := range pxy.allPeer {
+		if err := p.Handshake(pxy.bestState.NetworkId, td, hash, genesis.Hash()); err != nil {
+			logger.Error("Ethereum handshake failed:", err)
+		}
+
+	}
 }
 
 var pxy *proxy
@@ -201,7 +218,7 @@ func test2() {
 	pxy = &proxy{
 		upstreamNode: node,
 		upstreamConn: make(map[discover.NodeID]*conn, 0),
-		allPeer:make(map[discover.NodeID]*p2p.Peer, 0),
+		allPeer:      make(map[discover.NodeID]*p2p.Peer, 0),
 		// upstreamState: make(map[discover.NodeID]statusData, 0),
 		bestState: statusData{
 			ProtocolVersion: gversion,
