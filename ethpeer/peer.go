@@ -471,12 +471,12 @@ func (ps *PeerSet) BestPeer() *Peer {
 
 // Close disconnects all peers.
 // No new peers can be registered after Close has returned.
-func (ps *PeerSet) Close() {
-	ps.lock.Lock()
-	defer ps.lock.Unlock()
+// func (ps *PeerSet) Close() {
+// 	ps.lock.Lock()
+// 	defer ps.lock.Unlock()
 
-	for _, p := range ps.peers {
-		p.Disconnect(p2p.DiscQuitting)
-	}
-	ps.closed = true
-}
+// 	for _, p := range ps.peers {
+// 		p.Disconnect(p2p.DiscQuitting)
+// 	}
+// 	ps.closed = true
+// }
