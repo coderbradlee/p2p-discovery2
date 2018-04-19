@@ -462,6 +462,9 @@ func (ps *PeerSet) BestPeer() *Peer {
 		bestTd   *big.Int
 	)
 	for _, p := range ps.peers {
+		if p==nil{
+			continue
+		}
 		if _, td := p.Head(); bestPeer == nil || td.Cmp(bestTd) > 0 {
 			bestPeer, bestTd = p, td
 		}
