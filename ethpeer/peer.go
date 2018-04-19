@@ -88,7 +88,7 @@ type Peer struct {
 	P  *p2p.Peer
 	rw p2p.MsgReadWriter
 
-	version  int         // Protocol version negotiated
+	version  uint32      // Protocol version negotiated
 	forkDrop *time.Timer // Timed connection dropper if forks aren't validated in time
 
 	head common.Hash
@@ -99,7 +99,7 @@ type Peer struct {
 	knownBlocks *set.Set // Set of block hashes known to be known by this peer
 }
 
-func NewPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter) *Peer {
+func NewPeer(version uint32, p *p2p.Peer, rw p2p.MsgReadWriter) *Peer {
 	id := p.ID()
 
 	return &Peer{
