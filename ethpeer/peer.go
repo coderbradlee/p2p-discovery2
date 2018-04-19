@@ -103,7 +103,7 @@ func NewPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter) *Peer {
 	id := p.ID()
 
 	return &Peer{
-		Peer:        p,
+		P:           p,
 		rw:          rw,
 		version:     version,
 		id:          fmt.Sprintf("%x", id[:8]),
@@ -311,6 +311,11 @@ func (p *Peer) Handshake(network uint64, td *big.Int, head common.Hash, genesis 
 	return nil
 }
 
+type errCode int
+
+func errResp(code errCode, format string, v ...interface{}) error {
+	return fmt.Errorf("%v - %v", code, fmt.Sprintf(format, v...))
+}
 func (p *Peer) readStatus(network uint64, status *statusData, genesis common.Hash) (err error) {
 	msg, err := p.rw.ReadMsg()
 	if err != nil {
