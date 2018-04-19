@@ -292,7 +292,7 @@ func test() {
 	runv5 := false
 	restrictList := ""
 	if runv5 {
-		if _, err := discv5.ListenUDP(nodeKey, conn, realaddr, "", restrictList); err != nil {
+		if _, err := discv5.ListenUDP(nodekey, conn, realaddr, "", nil); err != nil {
 			logger.Error("%v", err)
 			return
 		}
