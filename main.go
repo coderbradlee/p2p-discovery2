@@ -205,7 +205,11 @@ func (pxy *proxy) pullBestBlock() {
 	// 		bestPeer, bestTd = p, td
 	// 	}
 	// }
-	fmt.Println("bestpeer:", pxy.ethpeerset.BestPeer().P)
+	bp := pxy.ethpeerset.BestPeer()
+	if bp != nil {
+		fmt.Println("bestpeer:", bp.P)
+	}
+	// fmt.Println("bestpeer:", .P)
 }
 
 var pxy *proxy
