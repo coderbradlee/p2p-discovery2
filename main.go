@@ -181,19 +181,26 @@ func (pxy *proxy) Start() {
 	}()
 }
 func (pxy *proxy) pullBestBlock() {
+	// var (
+	// 	genesis = pxy.bestState.GenesisBlock
+	// 	head    = pxy.bestHeader
+	// 	hash    = pxy.bestHeader.Hash()
+	// 	number  = pxy.bestHeader.Number.Uint64()
+	// 	td      = pxy.bestState.TD
+	// )
 	var (
-		genesis = pxy.bestState.GenesisBlock
-		head    = pxy.bestHeader
-		hash    = pxy.bestHeader.Hash()
-		number  = pxy.bestHeader.Number.Uint64()
-		td      = pxy.bestState.TD
+		bestPeer *peer
+		bestTd   *big.Int
 	)
 	for _, p := range pxy.allPeer {
-		if err := p.Handshake(pxy.bestState.NetworkId, td, hash, genesis.Hash()); err != nil {
-			logger.Error("Ethereum handshake failed:", err)
+		// if err := p.Handshake(pxy.bestState.NetworkId, td, hash, genesis.Hash()); err != nil {
+		// 	logger.Error("Ethereum handshake failed:", err)
+		// }
+		if _, td := p.Head(); bestPeer == nil || td.Cmp(bestTd) > 0 {
+			bestPeer, bestTd = p, td
 		}
-
 	}
+	fmt.Println("bestpeer:", bestPeer)
 }
 
 var pxy *proxy
