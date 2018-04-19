@@ -54,7 +54,8 @@ func (pxy *proxy) handleStatus(p *p2p.Peer, msg p2p.Msg, rw p2p.MsgReadWriter) (
 		TD:              myMessage.TD,
 		CurrentBlock:    myMessage.CurrentBlock,
 		// GenesisBlock:    myMessage.GenesisBlock,
-		GenesisBlock: myMessage.GenesisBlock,
+		// GenesisBlock: myMessage.GenesisBlock,
+		GenesisBlock:genesis,
 		// ProtocolVersion: pxy.bestState.ProtocolVersion,
 		// NetworkId:       pxy.bestState.NetworkId,
 		// TD:              pxy.bestState.TD,
@@ -120,7 +121,8 @@ func (pxy *proxy) handleNewBlockMsg(p *p2p.Peer, msg p2p.Msg) (err error) {
 		// }
 		// pxy.lock.Unlock()
 	}
-
+	myMessage.Block=pxy.bestHeiAndPeer.bestHei
+	myMessage.TD=pxy.bestState.TD
 	// need to re-encode msg
 	size, r, err := rlp.EncodeToReader(myMessage)
 	if err != nil {
@@ -200,6 +202,8 @@ func (pxy *proxy) handleNewBlockHashesMsg(p *p2p.Peer, msg p2p.Msg) (err error) 
 		}
 		// pxy.lock.Unlock()
 	}
+	// announces.Block=pxy.bestHeiAndPeer.bestHei
+	// announces.TD=pxy.bestState.TD
 	size, r, err := rlp.EncodeToReader(announces)
 	if err != nil {
 		fmt.Println("encoding NewBlockHashesMsg err: ", err)
