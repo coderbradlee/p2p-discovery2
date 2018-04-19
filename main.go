@@ -114,7 +114,7 @@ type proxy struct {
 	// upstreamState map[discover.NodeID]statusData
 	// allPeer       map[discover.NodeID]*p2p.Peer
 	ethpeerset *ethpeer.PeerSet
-	NewPeerSet
+	// NewPeerSet
 	bestState     statusData
 	bestStateChan chan statusData
 	srv           *p2p.Server
@@ -226,12 +226,12 @@ func test2() {
 		fmt.Println("discover.ParseNode:", err)
 		return
 	}
-	ps:=ethpeer.NewPeerSet()
+	ps := ethpeer.NewPeerSet()
 	pxy = &proxy{
 		upstreamNode: node,
 		upstreamConn: make(map[discover.NodeID]*conn, 0),
 		// allPeer:      make(map[discover.NodeID]*p2p.Peer, 0),
-		ethpeerset:ps,
+		ethpeerset: ps,
 		// upstreamState: make(map[discover.NodeID]statusData, 0),
 		bestState: statusData{
 			ProtocolVersion: gversion,
