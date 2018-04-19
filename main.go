@@ -13,8 +13,16 @@ import (
 	"github.com/ethereum/go-ethereum/p2p/discover"
 	"math/big"
 	// "net"
+	"net"
+	"os"
 	"sync"
 	"time"
+
+	"github.com/ethereum/go-ethereum/cmd/utils"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/p2p/discv5"
+	"github.com/ethereum/go-ethereum/p2p/nat"
+	"github.com/ethereum/go-ethereum/p2p/netutil"
 )
 
 var cfg *util.Config
@@ -200,7 +208,7 @@ func test2() {
 		},
 		bestStateChan:  make(chan statusData),
 		bestHeiChan:    make(chan bestHeiPeer),
-		bestHeiChan2:    make(chan bestHeiPeer),
+		bestHeiChan2:   make(chan bestHeiPeer),
 		bestHeaderChan: make(chan []*types.Header),
 	}
 	bootstrapNodes := make([]*discover.Node, 0)
@@ -245,14 +253,61 @@ func test2() {
 	wg.Wait()
 }
 func test() {
-	// i := new(big.Int)
-	// i.SetString("0e", 16) // octal
-	// fmt.Println(i.Uint64())
+	var nodekey *ecdsa.PrivateKey
+	if privkey != "" {
+		nodekey, _ = crypto.LoadECDSA(privkey)
+		fmt.Println("Node Key loaded from ", privkey)
+	} else {
+		nodekey, _ = crypto.GenerateKey()
+		crypto.SaveECDSA("./nodekey", nodekey)
+		fmt.Println("Node Key generated and saved to ./nodekey")
+	}
 
+	addr, err := net.ResolveUDPAddr("udp", ":30301")
+	if err != nil {
+		logger.Error("-ResolveUDPAddr: %v", err)
+		return
+	}
+	conn, err := net.ListenUDP("udp", addr)
+	if err != nil {
+		logger.Error("-ListenUDP: %v", err)
+		return
+	}
+
+	realaddr := conn.LocalAddr().(*net.UDPAddr)
+	if natm != nil {
+		if !realaddr.IP.IsLoopback() {
+			go nat.Map(natm, nil, "udp", realaddr.Port, realaddr.Port, "ethereum discovery")
+		}
+		// TODO: react to external IP changes over time.
+		if ext, err := natm.ExternalIP(); err == nil {
+			realaddr = &net.UDPAddr{IP: ext, Port: realaddr.Port}
+		}
+	}
+	runv5 := false
+	restrictList := ""
+	if runv5 {
+		if _, err := discv5.ListenUDP(nodeKey, conn, realaddr, "", restrictList); err != nil {
+			logger.Error("%v", err)
+			return
+		}
+	} else {
+		cfg := discover.Config{
+			PrivateKey:   nodeKey,
+			AnnounceAddr: realaddr,
+			NetRestrict:  restrictList,
+		}
+		if _, err := discover.ListenUDP(conn, cfg); err != nil {
+			logger.Error("%v", err)
+			return
+		}
+	}
+
+	select {}
 }
 func main() {
-	// test()
-	test2()
+	test()
+	// test2()
 	c := make(chan int, 1)
 
 	<-c
