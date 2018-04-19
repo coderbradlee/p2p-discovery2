@@ -14,6 +14,7 @@ import (
 	// "github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/types"
 	// "github.com/ethereum/go-ethereum/params"
+	ethpeer "./ethpeer"
 )
 
 func (pxy *proxy) handleStatus(p *p2p.Peer, msg p2p.Msg, rw p2p.MsgReadWriter) (err error) {
