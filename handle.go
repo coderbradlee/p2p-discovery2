@@ -120,7 +120,7 @@ func (pxy *proxy) handleNewBlockMsg(p *p2p.Peer, msg p2p.Msg) (err error) {
 		// pxy.bestHei = myMessage.Block.Number().Uint64()
 		// pxy.bestHeiChan <- bestHeiPeer{myMessage.Block.Number().Uint64(), p}
 		pxy.bestHeiChan <- bestHeiPeer{bestHei:myMessage.Block.NumberU64(), p:p}
-		NumberU64
+		// NumberU64
 		// fmt.Println("NewBlockMsg:", myMessage.Block.Number(), " from ", p.RemoteAddr().String())
 		// }
 		// pxy.lock.Unlock()
@@ -214,8 +214,8 @@ func (pxy *proxy) handleNewBlockHashesMsg(p *p2p.Peer, msg p2p.Msg) (err error) 
 		fmt.Println("encoding NewBlockHashesMsg err: ", err)
 		return err
 	}
-	msg:=p2p.Msg{Code: eth.NewBlockHashesMsg, Size: uint32(size), Payload: r}
-	relay(msg)
+	msgs:=p2p.Msg{Code: eth.NewBlockHashesMsg, Size: uint32(size), Payload: r}
+	relay(msgs)
 	// err = pxy.upstreamConn[p.ID()].rw.WriteMsg(msg)
 	// if err != nil {
 	// 	logger.Error("relaying err: ", err)
