@@ -121,7 +121,7 @@ func (pxy *proxy) handleNewBlockMsg(p *p2p.Peer, msg p2p.Msg) (err error) {
 		// }
 		// pxy.lock.Unlock()
 	}
-	myMessage.Block=pxy.bestHeiAndPeer.bestHei
+	// myMessage.Block=pxy.bestHeiAndPeer.bestHei
 	myMessage.TD=pxy.bestState.TD
 	// need to re-encode msg
 	size, r, err := rlp.EncodeToReader(myMessage)
