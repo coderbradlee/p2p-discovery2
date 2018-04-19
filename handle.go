@@ -55,6 +55,7 @@ func (pxy *proxy) handleStatus(p *p2p.Peer, msg p2p.Msg, rw p2p.MsgReadWriter) (
 		CurrentBlock:    myMessage.CurrentBlock,
 		// GenesisBlock:    myMessage.GenesisBlock,
 		GenesisBlock: myMessage.GenesisBlock,
+		fmt.Println("genesis:",myMessage.GenesisBlock.Hex())
 		// GenesisBlock:genesis,
 		// ProtocolVersion: pxy.bestState.ProtocolVersion,
 		// NetworkId:       pxy.bestState.NetworkId,
