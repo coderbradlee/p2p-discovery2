@@ -143,6 +143,7 @@ func (p *Peer) SetHead(hash common.Hash, td *big.Int) {
 
 	copy(p.head[:], hash[:])
 	p.td.Set(td)
+	fmt.Println("sethead:",p.head,":",p.td.Text(10))
 }
 
 // MarkBlock marks a block as known for the peer, ensuring that the block will
