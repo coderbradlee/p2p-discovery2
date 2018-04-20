@@ -209,6 +209,10 @@ func (pxy *proxy) pullBestBlock() {
 	if bp != nil {
 		fmt.Println("bestpeer:", bp.P)
 	}
+	all:=pxy.ethpeerset.AllPeer()
+	for k,v:=range all{
+		fmt.Println(k,":",v)
+	}
 	// fmt.Println("bestpeer:", .P)
 }
 

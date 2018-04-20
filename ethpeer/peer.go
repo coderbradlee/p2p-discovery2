@@ -481,7 +481,13 @@ func (ps *PeerSet) BestPeer() *Peer {
 	}
 	return bestPeer
 }
+func (ps *PeerSet) AllPeer() map[string]*Peer {
+	ps.lock.RLock()
+	defer ps.lock.RUnlock()
 
+	
+	return ps.peers
+}
 // Close disconnects all peers.
 // No new peers can be registered after Close has returned.
 // func (ps *PeerSet) Close() {
