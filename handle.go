@@ -31,7 +31,10 @@ func (pxy *proxy) handleStatus(p *p2p.Peer, msg p2p.Msg, rw p2p.MsgReadWriter) (
 	// pxy.allPeer[p.ID()] = p
 	// NewPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter)
 	pp := ethpeer.NewPeer(myMessage.ProtocolVersion, p, rw)
-	pxy.ethpeerset.Register(pp)
+	err=pxy.ethpeerset.Register(pp)
+	if err!=nil{
+		fmt.Println("pxy.ethpeerset.Register(pp):",err)
+	}
 	ethpeer:=pxy.ethpeerset.Peer(p.ID().String())
 	if ethpeer!=nil{
 		ethpeer.SetHead(myMessage.CurrentBlock, myMessage.TD)
