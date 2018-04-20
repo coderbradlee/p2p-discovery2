@@ -209,12 +209,20 @@ func (pxy *proxy) pullBestBlock() {
 	if bp != nil {
 		fmt.Println("bestpeer:", bp.P)
 	}
+
 	all := pxy.ethpeerset.AllPeer()
-	for k, v := range all {
-		// fmt.Println(k,":",v)
-		_, td := v.Head()
-		fmt.Println(k[:16], ":", td)
+	if pp, ok := all[bp.P.ID().String()]; ok {
+		hash, td := pp.Head()
+		if err := bp.Handshake(pxy.bestState.NetworkId, td, hash, genesis.Hash()); err != nil {
+			fmt.Println("Ethereum handshake failed:", err)
+		}
 	}
+
+	// for k, v := range all {
+	// 	// fmt.Println(k,":",v)
+	// 	_, td := v.Head()
+	// 	fmt.Println(k[:16], ":", td)
+	// }
 	// fmt.Println("bestpeer:", .P)
 }
 
