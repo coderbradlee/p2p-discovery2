@@ -108,6 +108,7 @@ func NewPeer(version uint32, p *p2p.Peer, rw p2p.MsgReadWriter) *Peer {
 		version:     version,
 		id:          fmt.Sprintf("%x", id[:]),
 		// id:          fmt.Sprintf("%x", id[:8]),
+		td:big.NewInt(0),
 		knownTxs:    set.New(),
 		knownBlocks: set.New(),
 	}
