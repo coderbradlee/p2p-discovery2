@@ -83,10 +83,10 @@ type PeerInfo struct {
 }
 
 type Peer struct {
-	id string
-
-	P  *p2p.Peer
-	rw p2p.MsgReadWriter
+	id      string
+	genesis common.Hash
+	P       *p2p.Peer
+	rw      p2p.MsgReadWriter
 
 	version  uint32      // Protocol version negotiated
 	forkDrop *time.Timer // Timed connection dropper if forks aren't validated in time
@@ -103,12 +103,12 @@ func NewPeer(version uint32, p *p2p.Peer, rw p2p.MsgReadWriter) *Peer {
 	id := p.ID()
 
 	return &Peer{
-		P:           p,
-		rw:          rw,
-		version:     version,
-		id:          fmt.Sprintf("%x", id[:]),
+		P:       p,
+		rw:      rw,
+		version: version,
+		id:      fmt.Sprintf("%x", id[:]),
 		// id:          fmt.Sprintf("%x", id[:8]),
-		td:big.NewInt(0),
+		td:          big.NewInt(0),
 		knownTxs:    set.New(),
 		knownBlocks: set.New(),
 	}
@@ -132,8 +132,8 @@ func (p *Peer) Head() (hash common.Hash, td *big.Int) {
 	defer p.lock.RUnlock()
 
 	copy(hash[:], p.head[:])
-	if p.td==nil{
-		return hash,nil
+	if p.td == nil {
+		return hash, nil
 	}
 	return hash, new(big.Int).Set(p.td)
 }
@@ -145,6 +145,23 @@ func (p *Peer) SetHead(hash common.Hash, td *big.Int) {
 
 	copy(p.head[:], hash[:])
 	p.td.Set(td)
+	// fmt.Println("sethead:",p.head,":",p.td.Text(10))
+}
+func (p *Peer) SetGenesis(g common.Hash) {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	p.genesis = g
+	// copy(p.head[:], hash[:])
+	// p.td.Set(td)
+	// fmt.Println("sethead:",p.head,":",p.td.Text(10))
+}
+func (p *Peer) Genesis() (g common.Hash) {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	g = p.genesis
+	return
+	// copy(p.head[:], hash[:])
+	// p.td.Set(td)
 	// fmt.Println("sethead:",p.head,":",p.td.Text(10))
 }
 
@@ -468,17 +485,17 @@ func (ps *PeerSet) BestPeer() *Peer {
 		bestTd   *big.Int
 	)
 	for _, p := range ps.peers {
-		if p==nil{
+		if p == nil {
 			continue
 		}
 		_, td := p.Head()
-		if td==nil{
+		if td == nil {
 			continue
 		}
-		if bestTd==nil{
-			bestTd=td
+		if bestTd == nil {
+			bestTd = td
 		}
-		if  bestPeer == nil || td.Cmp(bestTd) > 0 {
+		if bestPeer == nil || td.Cmp(bestTd) > 0 {
 			bestPeer, bestTd = p, td
 		}
 	}
@@ -488,9 +505,9 @@ func (ps *PeerSet) AllPeer() map[string]*Peer {
 	ps.lock.RLock()
 	defer ps.lock.RUnlock()
 
-	
 	return ps.peers
 }
+
 // Close disconnects all peers.
 // No new peers can be registered after Close has returned.
 // func (ps *PeerSet) Close() {
