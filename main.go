@@ -211,7 +211,9 @@ func (pxy *proxy) pullBestBlock() {
 	}
 	all:=pxy.ethpeerset.AllPeer()
 	for k,v:=range all{
-		fmt.Println(k,":",v)
+		// fmt.Println(k,":",v)
+		h,td:=v.Head()
+		fmt.Println(h,":",td)
 	}
 	// fmt.Println("bestpeer:", .P)
 }
