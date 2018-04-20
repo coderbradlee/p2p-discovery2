@@ -213,7 +213,7 @@ func (pxy *proxy) pullBestBlock() {
 	for _,v:=range all{
 		// fmt.Println(k,":",v)
 		h,td:=v.Head()
-		fmt.Println(h,":",td)
+		fmt.Println(h.Hex(),":",td)
 	}
 	// fmt.Println("bestpeer:", .P)
 }
