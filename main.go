@@ -65,9 +65,9 @@ var (
 	// startBlock = common.StringToHash("0x58f3ea40c3d1ffdea3c88b8d77ede6bdc2ecd6dc88b24aa2479304c359a043e5")
 	// startTD    = big.NewInt(2881436154511909728)
 	// 换个低一些的高度10000
-	startBlock = common.StringToHash("0xdc2d938e4cd0a149681e9e04352953ef5ab399d59bcd5b0357f6c0797470a524")
+	startBlock = common.HexToHash("0xdc2d938e4cd0a149681e9e04352953ef5ab399d59bcd5b0357f6c0797470a524")
 	startTD    = big.NewInt(2303762395359969)
-	genesis    = common.StringToHash("0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3")
+	genesis    = common.HexToHash("0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3")
 	gversion   = uint32(63)
 	gnetworkid = uint64(888888)
 )
