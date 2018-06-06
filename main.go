@@ -24,6 +24,7 @@ import (
 	"github.com/ethereum/go-ethereum/p2p/discv5"
 	"github.com/ethereum/go-ethereum/p2p/nat"
 	// "github.com/ethereum/go-ethereum/p2p/netutil"
+	"strings"
 )
 
 var cfg *util.Config
