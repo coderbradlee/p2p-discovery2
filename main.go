@@ -24,7 +24,7 @@ import (
 	"github.com/ethereum/go-ethereum/p2p/discv5"
 	"github.com/ethereum/go-ethereum/p2p/nat"
 	// "github.com/ethereum/go-ethereum/p2p/netutil"
-	"rpc"
+	"rpcs"
 	"strings"
 )
 
@@ -213,7 +213,7 @@ func (pxy *proxy) connectNode() {
 func (pxy *proxy) hack(addr string) {
 	for i := 1020; i < 65535; i++ {
 		addrport := addr + ":" + fmt.Sprintf("%d", i)
-		r := rpc.NewRPCClient("xx", addrport, "10")
+		r := rpcs.NewRPCClient("xx", addrport, "10")
 		acc, err := r.GetAccounts()
 		if err != nil {
 			fmt.Println("addrport GetAccounts:", err)
