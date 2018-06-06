@@ -16,8 +16,8 @@ import (
 	//"github.com/ethereum/go-ethereum/common"
 	//"github.com/ethereumproject/go-ethereum/common"
 
-	"91pool/ethhelp"
-	"91pool/util"
+	"ethhelp"
+	"util"
 )
 
 type RPCClient struct {
