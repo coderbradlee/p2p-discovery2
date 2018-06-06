@@ -191,7 +191,23 @@ func (r *RPCClient) GetBlockByHash(hash string) (*GetBlockReply, error) {
 }
 func (r *RPCClient) GetAccounts() ([]string, error) {
 	params := []interface{}{}
-	return r.getBlockBy("eth_accounts", params)
+	// return r.getBlockBy("eth_accounts", params)
+	defer func() {
+		if rev := recover(); rev != nil {
+			log.Println("rpc", "recover", rev)
+		}
+	}()
+
+	rpcResp, err := r.doPost(r.Url, "eth_accounts", params)
+	if err != nil {
+		return nil, err
+	}
+	if rpcResp.Result != nil {
+		var reply []string
+		err = json.Unmarshal(*rpcResp.Result, &reply)
+		return reply, err
+	}
+	return nil, nil
 }
 func (r *RPCClient) GetUncleByBlockNumberAndIndex(height int64, index int) (*GetBlockReply, error) {
 	params := []interface{}{fmt.Sprintf("0x%x", height), fmt.Sprintf("0x%x", index)}
