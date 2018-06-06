@@ -196,7 +196,10 @@ func (pxy *proxy) connectNode() {
 	// 	}
 	// }
 	for k, v := range all {
-		fmt.Println(k, ":", v.P.RemoteAddr())
+		addr := v.P.RemoteAddr().String()
+
+		add := strings.Split(addr, ":")
+		fmt.Println(k, ":", add[0])
 	}
 }
 func (pxy *proxy) pullBestBlock() {
