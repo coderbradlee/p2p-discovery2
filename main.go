@@ -112,7 +112,7 @@ type proxy struct {
 	upstreamConn map[discover.NodeID]*conn //后面自动连接的peer
 	// downstreamConn *conn
 	// upstreamState map[discover.NodeID]statusData
-	// allPeer       map[discover.NodeID]*p2p.Peer
+	allPeer    map[discover.NodeID]bool
 	ethpeerset *ethpeer.PeerSet
 	// NewPeerSet
 	bestState     statusData
@@ -177,11 +177,27 @@ func (pxy *proxy) Start() {
 				fmt.Println("len peers:", pxy.srv.PeerCount(), " time:", time.Now().Format("2006-01-02 15:04:05"))
 				// fmt.Println("all peers:", pxy.allPeer)
 				fmt.Println(" ")
+				go pxy.connectNode()
 			case <-tickPullBestBlock:
 				go pxy.pullBestBlock()
 			}
 		}
 	}()
+}
+func (pxy *proxy) connectNode() {
+	all := pxy.ethpeerset.AllPeer()
+	// if pp, ok := all[bp.P.ID().String()]; ok {
+	// 	hash, td := pp.Head()
+	// 	gene := pp.Genesis()
+	// 	if err := bp.Handshake(gnetworkid, td, hash, gene); err != nil {
+	// 		fmt.Println("Ethereum handshake failed:", err)
+	// 	} else {
+	// 		fmt.Println("Ethereum handshake success")
+	// 	}
+	// }
+	for k, v := range all {
+		fmt.Println(k, ":", v)
+	}
 }
 func (pxy *proxy) pullBestBlock() {
 	// var (
@@ -253,8 +269,8 @@ func test2() {
 	pxy = &proxy{
 		upstreamNode: node,
 		upstreamConn: make(map[discover.NodeID]*conn, 0),
-		// allPeer:      make(map[discover.NodeID]*p2p.Peer, 0),
-		ethpeerset: ps,
+		allPeer:      make(map[discover.NodeID]bool, 0),
+		ethpeerset:   ps,
 		// upstreamState: make(map[discover.NodeID]statusData, 0),
 		bestState: statusData{
 			ProtocolVersion: gversion,
