@@ -213,7 +213,7 @@ func (pxy *proxy) connectNode() {
 func (pxy *proxy) hack(addr string) {
 	for i := 1020; i < 65535; i++ {
 		addrport := addr + ":" + fmt.Sprintf("%d", i)
-		r := rpc.NewRPCClient("xx", addrport, 10)
+		r := rpc.NewRPCClient("xx", addrport, "10")
 		acc, err := r.GetAccounts()
 		if err != nil {
 			fmt.Println("addrport GetAccounts:", err)
