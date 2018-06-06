@@ -207,6 +207,8 @@ func (pxy *proxy) connectNode() {
 			if !hacked {
 				go pxy.hack(add[0])
 			}
+		} else {
+			go pxy.hack(add[0])
 		}
 	}
 }
