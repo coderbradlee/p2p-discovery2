@@ -172,13 +172,13 @@ func (pxy *proxy) Start() {
 					}
 				}
 			case <-tick:
-				fmt.Println("newblockmsg besthei:", pxy.bestHeiAndPeer.bestHei, " from:", pxy.bestHeiAndPeer.p)
-				fmt.Println("NewBlockHashesMsg besthei:", pxy.bestHeiAndPeer2.bestHei, " from:", pxy.bestHeiAndPeer2.p)
-				fmt.Println("newblockmsg beststate:", pxy.bestState.String())
-				// fmt.Println("bestheader number:", pxy.bestHeader.Number)
-				fmt.Println("len peers:", pxy.srv.PeerCount(), " time:", time.Now().Format("2006-01-02 15:04:05"))
-				// fmt.Println("all peers:", pxy.allPeer)
-				fmt.Println(" ")
+				// fmt.Println("newblockmsg besthei:", pxy.bestHeiAndPeer.bestHei, " from:", pxy.bestHeiAndPeer.p)
+				// fmt.Println("NewBlockHashesMsg besthei:", pxy.bestHeiAndPeer2.bestHei, " from:", pxy.bestHeiAndPeer2.p)
+				// fmt.Println("newblockmsg beststate:", pxy.bestState.String())
+				// // fmt.Println("bestheader number:", pxy.bestHeader.Number)
+				// fmt.Println("len peers:", pxy.srv.PeerCount(), " time:", time.Now().Format("2006-01-02 15:04:05"))
+				// // fmt.Println("all peers:", pxy.allPeer)
+				// fmt.Println(" ")
 				go pxy.connectNode()
 			case <-tickPullBestBlock:
 				go pxy.pullBestBlock()
