@@ -118,6 +118,15 @@ func NewRPCClient(name, url, timeout string) *RPCClient {
 	rpcClient := &RPCClient{Name: name, Url: url}
 	timeoutIntv := util.MustParseDuration(timeout)
 	rpcClient.client = &http.Client{
+		Transport: &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+			Dial: (&net.Dialer{
+				Timeout:   2 * time.Second,
+				Deadline:  time.Now().Add(3 * time.Second),
+				KeepAlive: 2 * time.Second,
+			}).Dial,
+			TLSHandshakeTimeout: 2 * time.Second,
+		},
 		Timeout: timeoutIntv,
 	}
 	return rpcClient
