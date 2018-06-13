@@ -58,7 +58,7 @@ func (r *RedisClient) GetPort(ip string) int {
 		// result, _ := cmds[0].(*redis.String).Result()
 		// ret, _ := strconv.Atoi(result)
 		ret, _ := cmds[0].(*redis.StringCmd).Int64()
-		return ret
+		return int(ret)
 	}
 }
 func (r *RedisClient) WriteGoodPort(iport string) {
