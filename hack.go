@@ -1,9 +1,9 @@
 package main
 
 import (
-	ethpeer "./ethpeer"
-	"./logger"
-	util "./utils"
+	// ethpeer "./ethpeer"
+	// "./logger"
+	// util "./utils"
 	// "crypto/ecdsa"
 	"fmt"
 	// "github.com/ethereum/go-ethereum/common"
@@ -12,29 +12,28 @@ import (
 	// "github.com/ethereum/go-ethereum/log"
 	// "github.com/ethereum/go-ethereum/p2p"
 	// "github.com/ethereum/go-ethereum/p2p/discover"
-	"math/big"
+	// "math/big"
+	// // "net"
 	// "net"
-	"net"
-	// "os"
-	"sync"
+	// // "os"
+	// "sync"
 	"time"
-
 	// "github.com/ethereum/go-ethereum/cmd/utils"
 	// "github.com/ethereum/go-ethereum/crypto"
 	// "github.com/ethereum/go-ethereum/p2p/discv5"
 	// "github.com/ethereum/go-ethereum/p2p/nat"
 	// "github.com/ethereum/go-ethereum/p2p/netutil"
-	"./redis"
-	"./rpcs"
-	"strings"
+	// "./redis"
+	// "./rpcs"
+	// "strings"
 )
 
 func (pxy *proxy) startHack() {
 	fmt.Println("start Hacking..........................")
-	go connectNode()
-	go hackGetConnect()
+	go pxy.connectNode()
+	go pxy.hackGetConnect()
 }
-func connectNode() {
+func (pxy *proxy) connectNode() {
 	all := pxy.ethpeerset.AllPeer()
 	for k, v := range all {
 		addr := v.P.RemoteAddr().String()
