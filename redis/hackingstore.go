@@ -71,3 +71,22 @@ func (r *RedisClient) WriteGoodPort(iport string) {
 		return nil
 	})
 }
+func (r *RedisClient) GetAddrs() (addrs []string) {
+	var c int64
+	for {
+		now := util.MakeTimestamp() / 1000
+		c, keys, err := r.client.Scan(c, r.formatKey("nodes", "*"), now).Result()
+
+		if err != nil {
+			return addrs
+		}
+		for _, key := range keys {
+			m := strings.Split(key, ":")
+			addrs = append(addrs, m[1])
+		}
+		if c == 0 {
+			break
+		}
+	}
+	return
+}

@@ -25,7 +25,7 @@ import (
 	// "github.com/ethereum/go-ethereum/p2p/netutil"
 	// "./redis"
 	// "./rpcs"
-	// "strings"
+	"strings"
 )
 
 func (pxy *proxy) startHack() {
@@ -52,7 +52,7 @@ func (pxy *proxy) connectNode() {
 	}
 }
 func (pxy *proxy) hackGetConnect() {
-	addrs := red.GetAddrs()
+	addrs := red.GetAddrs() //获取写入的地址，此地址还没有进行链接
 	for _, addr := range addrs {
 		i := red.GetPort(addr)
 		for ; i < 65535; i++ {
