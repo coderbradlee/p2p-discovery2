@@ -49,12 +49,12 @@ func (r *RedisClient) GetPort(ip string) int {
 	//map eth:nodes:ip port 1024 lastBeat 1111111
 	//set ip port 可以联通的
 	cmds, err := tx.Exec(func() error {
-		tx.HGet(r.formatKey("nodes", ip), port)
+		tx.HGet(r.formatKey("nodes", ip), "port")
 	})
 	if err != nil && err != redis.Nil {
 		return 0
 	} else {
-		result, _ := cmds[0].(*redis.StringStringMapCmd).Result()
+		result, _ := cmds[0].(*redis.String).Result()
 		ret, _ := strconv.Atoi(result)
 		return ret
 	}
@@ -65,6 +65,6 @@ func (r *RedisClient) WriteGoodPort(iport string) {
 	//map eth:nodes:ip port 1024 lastBeat 1111111
 	//set ip port 可以联通的
 	tx.Exec(func() error {
-		tx.Sadd(r.formatKey("goodport"), iport)
+		tx.SAdd(r.formatKey("goodport"), iport)
 	})
 }
