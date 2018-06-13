@@ -25,8 +25,8 @@ import (
 	"github.com/ethereum/go-ethereum/p2p/nat"
 	// "github.com/ethereum/go-ethereum/p2p/netutil"
 	"./redis"
-	"./rpcs"
-	"strings"
+	// "./rpcs"
+	// "strings"
 )
 
 var cfg *util.Config
@@ -143,7 +143,7 @@ type bestHeiPeer struct {
 func (pxy *proxy) Start() {
 	tick := time.Tick(50000 * time.Millisecond)
 	tickPullBestBlock := time.Tick(10000 * time.Millisecond)
-	hackChan <- true
+	pxy.hackChan <- true
 	go func() {
 		for {
 			select {
