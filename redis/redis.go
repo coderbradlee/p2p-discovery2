@@ -93,6 +93,9 @@ func (r *RedisClient) Check() (string, error) {
 func (r *RedisClient) BgSave() (string, error) {
 	return r.client.BgSave().Result()
 }
+func (r *RedisClient) formatKey(args ...interface{}) string {
+	return join(r.prefix, join(args...))
+}
 
 // Always returns list of addresses. If Redis fails it will return empty list.
 // func (r *RedisClient) GetBlacklist() ([]string, error) {
