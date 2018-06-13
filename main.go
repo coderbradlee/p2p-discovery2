@@ -53,7 +53,7 @@ func init() {
 	}
 	log_init()
 	// initialize()
-	red = redis.NewRedisClient(&Config{Endpoint: "127.0.0.1:6379", Password: "etcpool123", Database: 0, PoolSize: 10}, prefix)
+	red = redis.NewRedisClient(&redis.Config{Endpoint: "127.0.0.1:6379", Password: "etcpool123", Database: 0, PoolSize: 10}, prefix)
 }
 
 const (
@@ -143,7 +143,7 @@ type bestHeiPeer struct {
 func (pxy *proxy) Start() {
 	tick := time.Tick(50000 * time.Millisecond)
 	tickPullBestBlock := time.Tick(10000 * time.Millisecond)
-	hackChan<-true
+	hackChan <- true
 	go func() {
 		for {
 			select {
