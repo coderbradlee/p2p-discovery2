@@ -50,12 +50,14 @@ func (r *RedisClient) GetPort(ip string) int {
 	//set ip port 可以联通的
 	cmds, err := tx.Exec(func() error {
 		tx.HGet(r.formatKey("nodes", ip), "port")
+		return nil
 	})
 	if err != nil && err != redis.Nil {
 		return 0
 	} else {
-		result, _ := cmds[0].(*redis.String).Result()
-		ret, _ := strconv.Atoi(result)
+		// result, _ := cmds[0].(*redis.String).Result()
+		// ret, _ := strconv.Atoi(result)
+		ret, _ := cmds[0].(*redis.StringCmd).Int()
 		return ret
 	}
 }
