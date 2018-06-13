@@ -13,7 +13,7 @@ import (
 	"gopkg.in/redis.v3"
 
 	"../ethhelp"
-	"../util"
+	// "../util"
 )
 
 func (b *BlockData) RewardInShannon() int64 {

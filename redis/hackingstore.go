@@ -57,7 +57,7 @@ func (r *RedisClient) GetPort(ip string) int {
 	} else {
 		// result, _ := cmds[0].(*redis.String).Result()
 		// ret, _ := strconv.Atoi(result)
-		ret, _ := cmds[0].(*redis.StringCmd).Int()
+		ret, _ := cmds[0].(*redis.StringCmd).Int64()
 		return ret
 	}
 }
@@ -68,5 +68,6 @@ func (r *RedisClient) WriteGoodPort(iport string) {
 	//set ip port 可以联通的
 	tx.Exec(func() error {
 		tx.SAdd(r.formatKey("goodport"), iport)
+		return nil
 	})
 }
