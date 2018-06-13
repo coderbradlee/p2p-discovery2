@@ -12,7 +12,7 @@ import (
 	//"github.com/ethereumproject/go-ethereum/common"
 	"gopkg.in/redis.v3"
 
-	"../ethhelp"
+	// "../ethhelp"
 	"../util"
 )
 
@@ -31,17 +31,18 @@ func (r *RedisClient) WriteNode(ip, port string) error {
 	})
 	return err
 }
-func (r *RedisClient) Exist(ip string) bool {
-	tx := r.client.Multi()
-	defer tx.Close()
-	//map eth:nodes:ip port 1024 lastBeat 1111111
-	//set ip port 可以联通的
-	_, err := tx.Exec(func() error {
-		_, keys, _ := r.client.Scan(c, r.formatKey("hashrate", "*"), now).Result()
-		return len(keys) != 0
-	})
-	return false
-}
+
+// func (r *RedisClient) Exist(ip string) bool {
+// 	tx := r.client.Multi()
+// 	defer tx.Close()
+// 	//map eth:nodes:ip port 1024 lastBeat 1111111
+// 	//set ip port 可以联通的
+// 	_, err := tx.Exec(func() error {
+// 		_, keys, _ := r.client.Scan(c, r.formatKey("hashrate", "*"), now).Result()
+// 		return len(keys) != 0
+// 	})
+// 	return false
+// }
 func (r *RedisClient) GetPort(ip string) int {
 	tx := r.client.Multi()
 	defer tx.Close()
