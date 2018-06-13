@@ -1,12 +1,12 @@
 package redis
 
 import (
-	"fmt"
-	"log"
+	// "fmt"
+	// "log"
 	"math/big"
-	"strconv"
-	"strings"
-	"time"
+	// "strconv"
+	// "strings"
+	// "time"
 
 	//"github.com/ethereum/go-ethereum/common"
 	//"github.com/ethereumproject/go-ethereum/common"
