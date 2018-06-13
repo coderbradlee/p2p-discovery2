@@ -65,6 +65,7 @@ func (pxy *proxy) hackGetConnect() {
 			if err == nil {
 				red.WriteGoodPort(addr + ":" + fmt.Sprintf("%d", i))
 			}
+			time.Sleep(3 * time.Second)
 		}
 	}
 
