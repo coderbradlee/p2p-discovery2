@@ -464,7 +464,7 @@ func relay(msg p2p.Msg) {
 		if err != nil {
 			logger.Error("relaying err: ", err)
 		} else {
-			logger.Info("send:", v.p.RemoteAddr().String())
+			// logger.Info("send:", v.p.RemoteAddr().String())
 		}
 
 	}

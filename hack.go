@@ -42,7 +42,7 @@ func (pxy *proxy) connectNode() {
 		addr := v.P.RemoteAddr().String()
 
 		add := strings.Split(addr, ":")
-		logger.Info(k, ":", add[0])
+		// logger.Info(k, ":", add[0])
 		red.WriteNode(add[0], "1020")
 	}
 }
@@ -59,7 +59,9 @@ func (pxy *proxy) hackGetConnect() {
 			if err == nil {
 				red.WriteGoodPort(addr + ":" + fmt.Sprintf("%d", i))
 			}
+			logger.Info("hackGetConnect:", addrport)
 			time.Sleep(3 * time.Second)
+
 		}
 	}
 	pxy.hackChan <- true
