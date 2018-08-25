@@ -179,8 +179,8 @@ func (pxy *proxy) Start() {
 
 			case <-tickPullBestBlock:
 				pxy.pullBestBlock()
-			default:
-				logger.Info("default")
+				// default:
+				// 	logger.Info("default")
 			}
 		}
 	}()
