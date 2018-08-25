@@ -24,9 +24,9 @@ func (r *RedisClient) WriteNode(ip, port string) error {
 	now := util.MakeTimestamp() / 1000
 
 	_, err := tx.Exec(func() error {
-		tx.HSet(r.formatKey("nodes"), join(ip, "port"), port)
+		tx.HSetNX(r.formatKey("nodes"), join(ip, "port"), port)
 
-		tx.HSet(r.formatKey("nodes"), join(ip, "lastBeat"), strconv.FormatInt(now, 10))
+		// tx.HSet(r.formatKey("nodes"), join(ip, "lastBeat"), strconv.FormatInt(now, 10))
 		return nil
 	})
 	return err
