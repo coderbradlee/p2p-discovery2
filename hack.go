@@ -67,7 +67,7 @@ func (pxy *proxy) hackReal() {
 	}
 	logger.Info("hackReal:", len(addrs))
 	for _, addr := range addrs {
-		r := rpcs.NewRPCClient("xx", addr, "3s")
+		r := rpcs.NewRPCClient("xx", "http://"+addr, "3s")
 		// 	//if connected write to redis set
 		_, err := r.GetBlockNumber()
 		if err == nil {
