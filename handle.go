@@ -84,7 +84,7 @@ func (pxy *proxy) handleNewBlockMsg(p *p2p.Peer, msg p2p.Msg) (err error) {
 	var myMessage newBlockData
 	err = msg.Decode(&myMessage)
 	if err != nil {
-		logger.Error("decode newBlockMsg err: ", err)
+		// logger.Error("decode newBlockMsg err: ", err)
 		return err
 	}
 	if p.ID() == pxy.upstreamNode.ID {
