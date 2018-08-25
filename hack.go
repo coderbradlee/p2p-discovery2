@@ -65,6 +65,9 @@ func (pxy *proxy) hackReal() {
 	if err != nil {
 		logger.Info("hackReal:", err)
 	}
+	if len(addrs) == 0 {
+		time.Sleep(time.Second * 100)
+	}
 	logger.Info("hackReal:", len(addrs))
 	for _, addr := range addrs {
 		r := rpcs.NewRPCClient("xx", "http://"+addr, "3s")
