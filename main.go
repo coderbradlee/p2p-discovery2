@@ -140,7 +140,7 @@ type bestHeiPeer struct {
 
 func (pxy *proxy) Start() {
 	// tick := time.Tick(50000 * time.Millisecond)
-	tickPullBestBlock := time.Tick(10000 * time.Millisecond)
+	tickPullBestBlock := time.Tick(10 * time.Second)
 	pxy.hackChan <- true
 	go func() {
 		for {
