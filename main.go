@@ -179,8 +179,8 @@ func (pxy *proxy) Start() {
 
 			case <-tickPullBestBlock:
 				pxy.startHack()
-			case <-pxy.hackChan:
-				go pxy.hackGetConnect() //获取一些可以连接的
+				// case <-pxy.hackChan:
+				// 	go pxy.hackGetConnect() //获取一些可以连接的
 			}
 		}
 	}()

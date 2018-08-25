@@ -85,6 +85,16 @@ func (r *RedisClient) WriteGoodPort(iport string) {
 		return nil
 	})
 }
+func (r *RedisClient) GetGoodPort() (ret []string) {
+	tx := r.client.Multi()
+	defer tx.Close()
+	//map eth:nodes:ip port 1024 lastBeat 1111111
+	//set ip port 可以连接的
+	tx.Exec(func() error {
+		ret = tx.SMembers(r.formatKey("goodport"))
+		return
+	})
+}
 func (r *RedisClient) GetAddrs() map[string]string {
 	return r.client.HGetAllMap(r.formatKey("nodes")).Val()
 }
