@@ -62,7 +62,7 @@ func (pxy *proxy) handle(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 
 				if _, ok := pxy.upstreamConn[p.ID()]; ok {
 					delete(pxy.upstreamConn, p.ID())
-					logger.Error("delete:", p.ID())
+					// logger.Error("delete:", p.ID())
 				}
 				pxy.lock.Unlock()
 			}
