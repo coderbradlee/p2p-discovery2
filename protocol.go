@@ -76,8 +76,8 @@ func (pxy *proxy) handle(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 			pxy.handleNewBlockMsg(p, msg)
 		case eth.NewBlockHashesMsg:
 			pxy.handleNewBlockHashesMsg(p, msg)
-		case eth.BlockHeadersMsg:
-			pxy.handleBlockHeadersMsg(p, msg)
+		// case eth.BlockHeadersMsg:
+		// 	pxy.handleBlockHeadersMsg(p, msg)
 		default:
 			break
 		}
