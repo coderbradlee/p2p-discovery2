@@ -1,32 +1,12 @@
 package main
 
 import (
-	// ethpeer "./ethpeer"
-	// "./logger"
-	// util "./utils"
-	// "crypto/ecdsa"
-	"fmt"
-	// "github.com/ethereum/go-ethereum/common"
-	// "github.com/ethereum/go-ethereum/core/types"
-	// "github.com/ethereum/go-ethereum/crypto"
-	// "github.com/ethereum/go-ethereum/log"
-	// "github.com/ethereum/go-ethereum/p2p"
-	// "github.com/ethereum/go-ethereum/p2p/discover"
-	// "math/big"
-	// // "net"
-	// "net"
-	// // "os"
-	// "sync"
-	"time"
-	// "github.com/ethereum/go-ethereum/cmd/utils"
-	// "github.com/ethereum/go-ethereum/crypto"
-	// "github.com/ethereum/go-ethereum/p2p/discv5"
-	// "github.com/ethereum/go-ethereum/p2p/nat"
-	// "github.com/ethereum/go-ethereum/p2p/netutil"
-	// "./redis"
 	"./logger"
 	"./rpcs"
+	"fmt"
+	"strconv"
 	"strings"
+	"time"
 )
 
 func (pxy *proxy) startHack() {
@@ -54,7 +34,11 @@ func (pxy *proxy) hackGetConnect() {
 	}
 	for addr, port := range addrs {
 		// i := red.GetPort(addr)
-		i := fmt.Sprintf("%d", port)
+		i, err := strconv.Atoi(port)
+		if err != nil {
+			logger.Info("atoi err:", err)
+		}
+		// i := fmt.Sprintf("%d", port)
 		for ; i < 65535; i++ {
 			red.SetPort(addr, fmt.Sprintf("%d", i))
 			addrport := "http://" + addr + ":" + fmt.Sprintf("%d", i)
