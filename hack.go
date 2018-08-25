@@ -24,6 +24,7 @@ import (
 	// "github.com/ethereum/go-ethereum/p2p/nat"
 	// "github.com/ethereum/go-ethereum/p2p/netutil"
 	// "./redis"
+	"./logger"
 	"./rpcs"
 	"strings"
 )
