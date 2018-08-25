@@ -57,10 +57,8 @@ func init() {
 }
 
 const (
-	ua          = "manspreading"
-	ver         = "1.0.0"
-	upstreamUrl = "enode://344d2d76587b931a8dccb61f5f3280c9486068ef2758252cf5c6ebc29d4385581137c45e2c218e4ee23a0b14d23ecb6ec12521362e9919380c3b00ff5401bea2@10.81.64.116:30304" //geth2
-	// upstreamUrl = "enode://2998c333662a61620126e8a5a44545b8c0b362ec8a89b246a3e2e15a076983525e148ef113152d2836b976fb8de860b03f997012793870d78ae0a56e565d8398@118.31.112.214:30304" //getf1
+	ua  = "manspreading"
+	ver = "1.0.0"
 
 	listenAddr = "0.0.0.0:36666"
 	privkey    = ""
@@ -188,33 +186,9 @@ func (pxy *proxy) Start() {
 
 func (pxy *proxy) pullBestBlock() {
 
-	// bp := pxy.ethpeerset.BestPeer()
-	// if bp != nil {
-	// 	fmt.Println("bestpeer:", bp.P)
-	// } else {
-	// 	return
-	// }
-
-	// all := pxy.ethpeerset.AllPeer()
-	// if pp, ok := all[bp.P.ID().String()]; ok {
-	// 	hash, td := pp.Head()
-	// 	gene := pp.Genesis()
-	// 	if err := bp.Handshake(gnetworkid, td, hash, gene); err != nil {
-	// 		fmt.Println("Ethereum handshake failed:", err)
-	// 	} else {
-	// 		fmt.Println("Ethereum handshake success")
-	// 	}
-	// }
-	all := pxy.ethpeerset.AllPeer()
-	for k, _ := range all {
+	for k, _ := range pxy.allPeer {
 		fmt.Printf("peer:%s \n", k)
 	}
-	// for k, v := range all {
-	// 	// fmt.Println(k,":",v)
-	// 	_, td := v.Head()
-	// 	fmt.Println(k[:16], ":", td)
-	// }
-	// fmt.Println("bestpeer:", .P)
 }
 
 var pxy *proxy
