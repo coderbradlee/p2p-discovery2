@@ -39,7 +39,7 @@ func (r *RedisClient) WriteNode(ip, port string) error {
 	// now := util.MakeTimestamp() / 1000
 
 	_, err := tx.Exec(func() error {
-		tx.HSetNx(r.formatKey("nodes"), ip, port)
+		tx.HSetNX(r.formatKey("nodes"), ip, port)
 
 		// tx.HSet(r.formatKey("nodes"), join(ip, "lastBeat"), strconv.FormatInt(now, 10))
 		return nil
