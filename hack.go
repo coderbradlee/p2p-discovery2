@@ -43,11 +43,12 @@ func (pxy *proxy) connectNode() {
 
 		add := strings.Split(addr, ":")
 		// logger.Info(k, ":", add[0])
-		red.WriteNode(add[0], "1020")
+		red.WriteNode(add[0], "1024")
 	}
 }
 func (pxy *proxy) hackGetConnect() {
 	addrs := red.GetAddrs() //获取写入的地址，此地址还没有进行链接
+	logger.Info("GetAddrs:", len(addrs))
 	for _, addr := range addrs {
 		i := red.GetPort(addr)
 		for ; i < 65535; i++ {
