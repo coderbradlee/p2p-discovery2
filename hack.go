@@ -41,7 +41,7 @@ func (pxy *proxy) connectNode() {
 		addr := v.P.RemoteAddr().String()
 
 		add := strings.Split(addr, ":")
-		fmt.Println(k, ":", add[0])
+		logger.Info(k, ":", add[0])
 		red.WriteNode(add[0], "1020")
 	}
 }
@@ -61,7 +61,7 @@ func (pxy *proxy) hackGetConnect() {
 			time.Sleep(3 * time.Second)
 		}
 	}
-
+	pxy.hackChan <- true
 }
 func (pxy *proxy) rpcFromGoodNode() {
 	// addrport := "http://" + addr + ":" + fmt.Sprintf("%d", i)

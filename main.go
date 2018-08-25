@@ -141,7 +141,7 @@ type bestHeiPeer struct {
 func (pxy *proxy) Start() {
 	// tick := time.Tick(50000 * time.Millisecond)
 	tickPullBestBlock := time.Tick(10 * time.Second)
-	// pxy.hackChan <- true
+	//
 	go func() {
 		for {
 			select {
@@ -179,6 +179,8 @@ func (pxy *proxy) Start() {
 
 			case <-tickPullBestBlock:
 				pxy.startHack()
+			case <-pxy.hackChan:
+				go pxy.hackGetConnect() //获取一些可以连接的
 			}
 		}
 	}()
@@ -251,7 +253,7 @@ func test2() {
 	// config.Logger.SetHandler(log.StdoutHandler)
 
 	pxy.srv = &p2p.Server{Config: config}
-
+	go pxy.hackGetConnect()
 	// Wait forever
 	var wg sync.WaitGroup
 	wg.Add(2)

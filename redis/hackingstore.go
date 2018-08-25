@@ -65,7 +65,7 @@ func (r *RedisClient) WriteGoodPort(iport string) {
 	tx := r.client.Multi()
 	defer tx.Close()
 	//map eth:nodes:ip port 1024 lastBeat 1111111
-	//set ip port 可以联通的
+	//set ip port 可以连接的
 	tx.Exec(func() error {
 		tx.SAdd(r.formatKey("goodport"), iport)
 		return nil
