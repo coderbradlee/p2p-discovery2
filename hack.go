@@ -38,7 +38,7 @@ func (pxy *proxy) startHack() {
 }
 func (pxy *proxy) connectNode() {
 	all := pxy.ethpeerset.AllPeer()
-	for k, v := range all {
+	for _, v := range all {
 		addr := v.P.RemoteAddr().String()
 
 		add := strings.Split(addr, ":")
