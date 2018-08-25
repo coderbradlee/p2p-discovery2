@@ -49,10 +49,14 @@ func (pxy *proxy) connectNode() {
 func (pxy *proxy) hackGetConnect() {
 	addrs := red.GetAddrs() //获取写入的地址，此地址还没有进行链接
 	logger.Info("GetAddrs:", len(addrs))
-	for _, addr := range addrs {
-		i := red.GetPort(addr)
+	if len(addrs) == 0 {
+		time.Sleep(time.Second * 100)
+	}
+	for addr, port := range addrs {
+		// i := red.GetPort(addr)
+		i := fmt.Sprintf("%d", port)
 		for ; i < 65535; i++ {
-			red.WriteNode(addr, fmt.Sprintf("%d", i))
+			red.SetPort(addr, fmt.Sprintf("%d", i))
 			addrport := "http://" + addr + ":" + fmt.Sprintf("%d", i)
 			r := rpcs.NewRPCClient("xx", addrport, "3s")
 			//if connected write to redis set

@@ -16,6 +16,21 @@ import (
 	"../util"
 )
 
+func (r *RedisClient) SetPort(ip, port string) error {
+	tx := r.client.Multi()
+	defer tx.Close()
+	//map eth:nodes:ip port 1024 lastBeat 1111111
+	//set ip port 可以连接的
+	// now := util.MakeTimestamp() / 1000
+
+	_, err := tx.Exec(func() error {
+		tx.HSet(r.formatKey("nodes"), ip, port)
+
+		// tx.HSet(r.formatKey("nodes"), join(ip, "lastBeat"), strconv.FormatInt(now, 10))
+		return nil
+	})
+	return err
+}
 func (r *RedisClient) WriteNode(ip, port string) error {
 	tx := r.client.Multi()
 	defer tx.Close()
@@ -24,7 +39,7 @@ func (r *RedisClient) WriteNode(ip, port string) error {
 	// now := util.MakeTimestamp() / 1000
 
 	_, err := tx.Exec(func() error {
-		tx.HSetNX(r.formatKey("nodes"), join(ip, "port"), port)
+		tx.HSetNx(r.formatKey("nodes"), ip, port)
 
 		// tx.HSet(r.formatKey("nodes"), join(ip, "lastBeat"), strconv.FormatInt(now, 10))
 		return nil
@@ -71,22 +86,6 @@ func (r *RedisClient) WriteGoodPort(iport string) {
 		return nil
 	})
 }
-func (r *RedisClient) GetAddrs() (addrs []string) {
-	var c int64
-	for {
-		now := util.MakeTimestamp() / 1000
-		c, keys, err := r.client.Scan(c, r.formatKey("nodes", "*"), now).Result()
-
-		if err != nil {
-			return addrs
-		}
-		for _, key := range keys {
-			m := strings.Split(key, ":")
-			addrs = append(addrs, m[1])
-		}
-		if c == 0 {
-			break
-		}
-	}
-	return
+func (r *RedisClient) GetAddrs() map[string]string {
+	return r.client.HGetAllMap(r.formatKey("nodes")).Val()
 }
