@@ -20,8 +20,8 @@ func (r *RedisClient) WriteNode(ip, port string) error {
 	tx := r.client.Multi()
 	defer tx.Close()
 	//map eth:nodes:ip port 1024 lastBeat 1111111
-	//set ip port 可以联通的
-	now := util.MakeTimestamp() / 1000
+	//set ip port 可以连接的
+	// now := util.MakeTimestamp() / 1000
 
 	_, err := tx.Exec(func() error {
 		tx.HSetNX(r.formatKey("nodes"), join(ip, "port"), port)
