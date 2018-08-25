@@ -42,7 +42,7 @@ func (pxy *proxy) handleStatus(p *p2p.Peer, msg p2p.Msg, rw p2p.MsgReadWriter) (
 	}
 
 	pxy.lock.Unlock()
-	logger.Info("add:", p.ID())
+	// logger.Info("add:", p.ID())
 
 	pxy.bestStateChan <- statusData{
 		ProtocolVersion: myMessage.ProtocolVersion,
