@@ -61,7 +61,10 @@ func (pxy *proxy) hackGetConnect() {
 	// pxy.hackChan <- true
 }
 func (pxy *proxy) hackReal() {
-	addrs := red.GetGoodPort() //获取写入的地址，此地址还没有进行链接
+	addrs, err := red.GetGoodPort() //获取写入的地址，此地址还没有进行链接
+	if err != nil {
+		logger.Info("hackReal:", err)
+	}
 	logger.Info("hackReal:", len(addrs))
 	for addr := range addrs {
 		r := rpcs.NewRPCClient("xx", addrport, "3s")
