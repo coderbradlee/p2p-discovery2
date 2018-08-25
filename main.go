@@ -185,7 +185,7 @@ func (pxy *proxy) Start() {
 }
 
 func (pxy *proxy) pullBestBlock() {
-
+	fmt.Println("start pullBestBlock")
 	for k, _ := range pxy.allPeer {
 		fmt.Printf("peer:%s \n", k)
 	}
