@@ -178,7 +178,7 @@ func (pxy *proxy) Start() {
 				}
 
 			case <-tickPullBestBlock:
-				go pxy.pullBestBlock()
+				pxy.pullBestBlock()
 			}
 		}
 	}()
