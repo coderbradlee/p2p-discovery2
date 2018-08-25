@@ -14,15 +14,15 @@ import (
 	"github.com/ethereum/go-ethereum/p2p/discover"
 	"math/big"
 	// "net"
-	"net"
+	// "net"
 	// "os"
 	"sync"
 	"time"
 
 	// "github.com/ethereum/go-ethereum/cmd/utils"
 	// "github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/p2p/discv5"
-	"github.com/ethereum/go-ethereum/p2p/nat"
+	// "github.com/ethereum/go-ethereum/p2p/discv5"
+	// "github.com/ethereum/go-ethereum/p2p/nat"
 	// "github.com/ethereum/go-ethereum/p2p/netutil"
 	"./redis"
 	// "./rpcs"
@@ -206,7 +206,7 @@ func (pxy *proxy) pullBestBlock() {
 	// 	}
 	// }
 	all := pxy.ethpeerset.AllPeer()
-	for k, _ := range m {
+	for k, _ := range all {
 		fmt.Printf("peer:%s \n", k)
 	}
 	// for k, v := range all {
