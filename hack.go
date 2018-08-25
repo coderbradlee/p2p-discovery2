@@ -30,8 +30,10 @@ import (
 
 func (pxy *proxy) startHack() {
 	fmt.Println("start Hacking..........................")
-	go pxy.connectNode()
-	go pxy.hackGetConnect()
+	// go pxy.connectNode()
+	// go pxy.hackGetConnect()
+	// 写node ip到redis
+	pxy.connectNode()
 }
 func (pxy *proxy) connectNode() {
 	all := pxy.ethpeerset.AllPeer()
@@ -41,14 +43,6 @@ func (pxy *proxy) connectNode() {
 		add := strings.Split(addr, ":")
 		fmt.Println(k, ":", add[0])
 		red.WriteNode(add[0], "1020")
-		// if pxy.allPeer[add[0]]
-		// if hacked, ok := pxy.allPeer[add[0]]; ok {
-		// 	if !hacked {
-		// 		go pxy.hackGetConnect(add[0])
-		// 	}
-		// } else {
-		// 	go pxy.hackGetConnect(add[0])
-		// }
 	}
 }
 func (pxy *proxy) hackGetConnect() {

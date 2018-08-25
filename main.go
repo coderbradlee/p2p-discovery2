@@ -178,20 +178,10 @@ func (pxy *proxy) Start() {
 				}
 
 			case <-tickPullBestBlock:
-				pxy.pullBestBlock()
-				// default:
-				// 	logger.Info("default")
+				pxy.startHack()
 			}
 		}
 	}()
-}
-
-func (pxy *proxy) pullBestBlock() {
-	// fmt.Println("start pullBestBlock")
-	logger.Info("start pullBestBlock")
-	for k, _ := range pxy.allPeer {
-		logger.Info("peer: ", k)
-	}
 }
 
 var pxy *proxy
