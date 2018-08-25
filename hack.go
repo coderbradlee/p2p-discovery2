@@ -68,7 +68,7 @@ func (pxy *proxy) scanIP(ip net.IP, i int) {
 		go func(proto, addr string) {
 			defer wg.Done()
 
-			c, err := net.DialTimeout(proto, addr, "1s")
+			c, err := net.DialTimeout(proto, addr, time.Duration(1*time.Second))
 			if err == nil {
 				c.Close()
 				// logrus.Infof("%s://%s is alive and reachable", proto, addr)
