@@ -2,7 +2,7 @@ package main
 
 import (
 	"./logger"
-	"./rpcs"
+	// "./rpcs"
 	"fmt"
 	"net"
 	"strconv"
@@ -59,7 +59,7 @@ func (pxy *proxy) hackGetConnect() {
 	}
 	pxy.hackChan <- true
 }
-func scanIP(ip net.IP, i int) {
+func (pxy *proxy) scanIP(ip net.IP, i int) {
 	var wg sync.WaitGroup
 	proto := "tcp"
 	for ; i < 65535; i++ {
@@ -68,7 +68,7 @@ func scanIP(ip net.IP, i int) {
 		go func(proto, addr string) {
 			defer wg.Done()
 
-			c, err := net.DialTimeout(proto, addr, timeout)
+			c, err := net.DialTimeout(proto, addr, "1s")
 			if err == nil {
 				c.Close()
 				// logrus.Infof("%s://%s is alive and reachable", proto, addr)
