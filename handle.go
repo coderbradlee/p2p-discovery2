@@ -43,16 +43,7 @@ func (pxy *proxy) handleStatus(p *p2p.Peer, msg p2p.Msg, rw p2p.MsgReadWriter) (
 
 	pxy.lock.Unlock()
 	logger.Info("add:", p.ID())
-	// 	pxy.bestState = statusData{
-	// 		ProtocolVersion: myMessage.ProtocolVersion,
-	// 		NetworkId:       myMessage.NetworkId,
-	// 		TD:              myMessage.TD,
-	// 		CurrentBlock:    myMessage.CurrentBlock,
-	// 		GenesisBlock:    myMessage.GenesisBlock,
-	// 	}
-	// 	fmt.Println("StatusMsg:", myMessage, " from ", p.RemoteAddr().String())
-	// }
-	// pxy.lock.Unlock()
+
 	pxy.bestStateChan <- statusData{
 		ProtocolVersion: myMessage.ProtocolVersion,
 		NetworkId:       myMessage.NetworkId,
@@ -60,9 +51,6 @@ func (pxy *proxy) handleStatus(p *p2p.Peer, msg p2p.Msg, rw p2p.MsgReadWriter) (
 		CurrentBlock:    myMessage.CurrentBlock,
 		GenesisBlock:    myMessage.GenesisBlock,
 	}
-	// pxy.bestHei = myMessage.Block.Number().Uint64()
-	// pxy.bestHeiChan <- myMessage.Block.Number().Uint64()
-	// fmt.Println("genesis:",myMessage.GenesisBlock.Hex())
 	err = p2p.Send(rw, eth.StatusMsg, &statusData{
 		ProtocolVersion: myMessage.ProtocolVersion,
 		NetworkId:       myMessage.NetworkId,
@@ -70,13 +58,6 @@ func (pxy *proxy) handleStatus(p *p2p.Peer, msg p2p.Msg, rw p2p.MsgReadWriter) (
 		CurrentBlock:    myMessage.CurrentBlock,
 		// GenesisBlock:    myMessage.GenesisBlock,
 		GenesisBlock: myMessage.GenesisBlock,
-
-		// GenesisBlock:genesis,
-		// ProtocolVersion: pxy.bestState.ProtocolVersion,
-		// NetworkId:       pxy.bestState.NetworkId,
-		// TD:              pxy.bestState.TD,
-		// CurrentBlock:    pxy.bestState.CurrentBlock,
-		// GenesisBlock:    pxy.bestState.GenesisBlock,
 	})
 
 	if err != nil {
@@ -100,8 +81,6 @@ func (pxy *proxy) handleNewBlockMsg(p *p2p.Peer, msg p2p.Msg) (err error) {
 		}
 	}
 
-	// // fmt.Println("NewBlockMsg2")
-	// // fmt.Println("msg.Code: ", formateCode(msg.Code))
 	var myMessage newBlockData
 	err = msg.Decode(&myMessage)
 	if err != nil {
@@ -111,19 +90,7 @@ func (pxy *proxy) handleNewBlockMsg(p *p2p.Peer, msg p2p.Msg) (err error) {
 	if p.ID() == pxy.upstreamNode.ID {
 		logger.Info("newblockmsg:", myMessage.Block.Number().Text(10), " from bootnode", p.RemoteAddr().String())
 	}
-	// fmt.Println("NewBlockMsg xx:", myMessage.Block.Number(), " from ", p.RemoteAddr().String())
-
 	{
-		// pxy.lock.Lock()
-		// defer pxy.lock.Unlock()
-		// if myMessage.TD.Cmp(pxy.bestState.TD) > 0 {
-		// 	pxy.bestState = statusData{
-		// 		ProtocolVersion: gversion,
-		// 		NetworkId:       gnetworkid,
-		// 		TD:              myMessage.TD,
-		// 		CurrentBlock:    myMessage.Block.Hash(),
-		// 		GenesisBlock:    genesis,
-		// 	}
 		pxy.bestStateChan <- statusData{
 			ProtocolVersion: gversion,
 			NetworkId:       gnetworkid,
@@ -131,13 +98,7 @@ func (pxy *proxy) handleNewBlockMsg(p *p2p.Peer, msg p2p.Msg) (err error) {
 			CurrentBlock:    myMessage.Block.Hash(),
 			GenesisBlock:    genesis,
 		}
-		// pxy.bestHei = myMessage.Block.Number().Uint64()
-		// pxy.bestHeiChan <- bestHeiPeer{myMessage.Block.Number().Uint64(), p}
 		pxy.bestHeiChan <- bestHeiPeer{bestHei: myMessage.Block.NumberU64(), p: p}
-		// NumberU64
-		// fmt.Println("NewBlockMsg:", myMessage.Block.Number(), " from ", p.RemoteAddr().String())
-		// }
-		// pxy.lock.Unlock()
 	}
 	// myMessage.Block=pxy.bestHeiAndPeer.bestHei
 	myMessage.TD = pxy.bestState.TD
@@ -150,42 +111,7 @@ func (pxy *proxy) handleNewBlockMsg(p *p2p.Peer, msg p2p.Msg) (err error) {
 	relay(p2p.Msg{Code: eth.NewBlockMsg, Size: uint32(size), Payload: r})
 	return nil
 }
-func (pxy *proxy) handleBlockHeadersMsg(p *p2p.Peer, msg p2p.Msg) (err error) {
-	fmt.Println("have BlockHeadersMsg")
-	var headers []*types.Header
-	if err := msg.Decode(&headers); err != nil {
-		fmt.Println("handleBlockHeadersMsg:", err)
-		return err
-	}
-	// If no headers were received, but we're expending a DAO fork check, maybe it's that
-	// if len(headers) == 0 {
-	// 	// Possibly an empty reply to the fork header checks, sanity check TDs
-	// 	verifyDAO := true
 
-	// 	// If we already have a DAO header, we can check the peer's TD against it. If
-	// 	// the peer's ahead of this, it too must have a reply to the DAO check
-
-	// 	daoHeader := core.BlockChain.GetHeaderByNumber(params.ChainConfig.DAOForkBlock.Uint64())
-	// 	// if daoHeader := pm.blockchain.GetHeaderByNumber(pm.chainconfig.DAOForkBlock.Uint64()); daoHeader != nil {
-	// 	if daoHeader != nil {
-	// 		pxy.lock.RLock()
-	// 		td := pxy.bestState.TD
-	// 		pxy.lock.RUnlock()
-
-	// 		if td.Cmp(core.BlockChain.GetTd(daoHeader.Hash(), daoHeader.Number.Uint64())) >= 0 {
-	// 			verifyDAO = false
-	// 		}
-	// 	}
-	// 	// If we're seemingly on the same chain, disable the drop timer
-	// 	if verifyDAO {
-	// 		fmt.Println("Seems to be on the same side of the DAO fork")
-	// 		pxy.bestHeaderChan <- headers
-	// 		return nil
-	// 	}
-	// }
-	pxy.bestHeaderChan <- headers
-	return nil
-}
 func (pxy *proxy) handleNewBlockHashesMsg(p *p2p.Peer, msg p2p.Msg) (err error) {
 	// fmt.Println("NewBlockHashesMsg")
 	// pxy.lock.Lock()

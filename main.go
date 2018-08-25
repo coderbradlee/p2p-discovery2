@@ -178,16 +178,7 @@ func (pxy *proxy) Start() {
 						pxy.bestHeader = *h
 					}
 				}
-			case <-tick:
-				// fmt.Println("newblockmsg besthei:", pxy.bestHeiAndPeer.bestHei, " from:", pxy.bestHeiAndPeer.p)
-				// fmt.Println("NewBlockHashesMsg besthei:", pxy.bestHeiAndPeer2.bestHei, " from:", pxy.bestHeiAndPeer2.p)
-				// fmt.Println("newblockmsg beststate:", pxy.bestState.String())
-				// // fmt.Println("bestheader number:", pxy.bestHeader.Number)
-				// fmt.Println("len peers:", pxy.srv.PeerCount(), " time:", time.Now().Format("2006-01-02 15:04:05"))
-				// // fmt.Println("all peers:", pxy.allPeer)
-				// fmt.Println(" ")
-				<-pxy.hackChan
-				go pxy.startHack()
+
 			case <-tickPullBestBlock:
 				go pxy.pullBestBlock()
 			}
@@ -196,45 +187,28 @@ func (pxy *proxy) Start() {
 }
 
 func (pxy *proxy) pullBestBlock() {
-	// var (
-	// 	genesis = pxy.bestState.GenesisBlock
-	// 	head    = pxy.bestHeader
-	// 	hash    = pxy.bestHeader.Hash()
-	// 	number  = pxy.bestHeader.Number.Uint64()
-	// 	td      = pxy.bestState.TD
-	// )
-	// var (
-	// 	bestPeer *p2p.peer
-	// 	bestTd   *big.Int
-	// )
-	// for _, p := range pxy.allPeer {
-	// 	newPeer
-	// 	// if err := p.Handshake(pxy.bestState.NetworkId, td, hash, genesis.Hash()); err != nil {
-	// 	// 	logger.Error("Ethereum handshake failed:", err)
-	// 	// }
 
-	// 	if _, td := p.Head(); bestPeer == nil || td.Cmp(bestTd) > 0 {
-	// 		bestPeer, bestTd = p, td
+	// bp := pxy.ethpeerset.BestPeer()
+	// if bp != nil {
+	// 	fmt.Println("bestpeer:", bp.P)
+	// } else {
+	// 	return
+	// }
+
+	// all := pxy.ethpeerset.AllPeer()
+	// if pp, ok := all[bp.P.ID().String()]; ok {
+	// 	hash, td := pp.Head()
+	// 	gene := pp.Genesis()
+	// 	if err := bp.Handshake(gnetworkid, td, hash, gene); err != nil {
+	// 		fmt.Println("Ethereum handshake failed:", err)
+	// 	} else {
+	// 		fmt.Println("Ethereum handshake success")
 	// 	}
 	// }
-	bp := pxy.ethpeerset.BestPeer()
-	if bp != nil {
-		fmt.Println("bestpeer:", bp.P)
-	} else {
-		return
-	}
-
 	all := pxy.ethpeerset.AllPeer()
-	if pp, ok := all[bp.P.ID().String()]; ok {
-		hash, td := pp.Head()
-		gene := pp.Genesis()
-		if err := bp.Handshake(gnetworkid, td, hash, gene); err != nil {
-			fmt.Println("Ethereum handshake failed:", err)
-		} else {
-			fmt.Println("Ethereum handshake success")
-		}
+	for k, _ := range m {
+		fmt.Printf("peer:%s \n", k)
 	}
-
 	// for k, v := range all {
 	// 	// fmt.Println(k,":",v)
 	// 	_, td := v.Head()
@@ -321,63 +295,6 @@ func test2() {
 		fmt.Println(err)
 	}
 	wg.Wait()
-}
-func test() {
-	var nodekey *ecdsa.PrivateKey
-	if privkey != "" {
-		nodekey, _ = crypto.LoadECDSA(privkey)
-		fmt.Println("Node Key loaded from ", privkey)
-	} else {
-		nodekey, _ = crypto.GenerateKey()
-		crypto.SaveECDSA("./nodekey", nodekey)
-		fmt.Println("Node Key generated and saved to ./nodekey")
-	}
-
-	addr, err := net.ResolveUDPAddr("udp", ":30301")
-	if err != nil {
-		logger.Error("-ResolveUDPAddr: %v", err)
-		return
-	}
-	conn, err := net.ListenUDP("udp", addr)
-	if err != nil {
-		logger.Error("-ListenUDP: %v", err)
-		return
-	}
-
-	realaddr := conn.LocalAddr().(*net.UDPAddr)
-	natm, err := nat.Parse("any")
-	if err != nil {
-		logger.Error("-nat: %v", err)
-		return
-	}
-	if natm != nil {
-		if !realaddr.IP.IsLoopback() {
-			go nat.Map(natm, nil, "udp", realaddr.Port, realaddr.Port, "ethereum discovery")
-		}
-		// TODO: react to external IP changes over time.
-		if ext, err := natm.ExternalIP(); err == nil {
-			realaddr = &net.UDPAddr{IP: ext, Port: realaddr.Port}
-		}
-	}
-	runv5 := false
-	// restrictList := ""
-	if runv5 {
-		if _, err := discv5.ListenUDP(nodekey, conn, realaddr, "", nil); err != nil {
-			logger.Error("%v", err)
-			return
-		}
-	} else {
-		cfg := discover.Config{
-			PrivateKey:   nodekey,
-			AnnounceAddr: realaddr,
-		}
-		if _, err := discover.ListenUDP(conn, cfg); err != nil {
-			logger.Error("%v", err)
-			return
-		}
-	}
-
-	select {}
 }
 func main() {
 	// test()
