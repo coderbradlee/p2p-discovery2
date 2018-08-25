@@ -132,6 +132,7 @@ type proxy struct {
 	bestHeader      types.Header
 	bestHeaderChan  chan []*types.Header
 	hackChan        chan bool
+	hackChan2       chan bool
 }
 type bestHeiPeer struct {
 	bestHei uint64
@@ -179,8 +180,10 @@ func (pxy *proxy) Start() {
 
 			case <-tickPullBestBlock:
 				pxy.startHack()
-				// case <-pxy.hackChan:
-				// 	go pxy.hackGetConnect() //获取一些可以连接的
+			case <-pxy.hackChan:
+				go pxy.hackGetConnect() //获取一些可以连接的
+			case <-pxy.hackChan2:
+				go pxy.hackReal() //获取一些可以连接的
 			}
 		}
 	}()
@@ -223,6 +226,7 @@ func test2() {
 		bestHeiChan2:   make(chan bestHeiPeer),
 		bestHeaderChan: make(chan []*types.Header),
 		hackChan:       make(chan bool),
+		hackChan2:      make(chan bool),
 	}
 	bootstrapNodes := make([]*discover.Node, 0)
 	for _, boot := range MainnetBootnodes {
