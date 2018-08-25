@@ -141,7 +141,7 @@ type bestHeiPeer struct {
 func (pxy *proxy) Start() {
 	// tick := time.Tick(50000 * time.Millisecond)
 	tickPullBestBlock := time.Tick(10 * time.Second)
-	pxy.hackChan <- true
+	// pxy.hackChan <- true
 	go func() {
 		for {
 			select {
@@ -180,7 +180,7 @@ func (pxy *proxy) Start() {
 			case <-tickPullBestBlock:
 				pxy.pullBestBlock()
 			default:
-				fmt.Println("default")
+				logger.Info("default")
 			}
 		}
 	}()
