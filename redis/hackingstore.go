@@ -5,15 +5,14 @@ import (
 	// "log"
 	// "math/big"
 	// "strconv"
-	"strings"
+	// "strings"
 	// "time"
 
 	//"github.com/ethereum/go-ethereum/common"
 	//"github.com/ethereumproject/go-ethereum/common"
 	"gopkg.in/redis.v3"
-
 	// "../ethhelp"
-	"../util"
+	// "../util"
 )
 
 func (r *RedisClient) SetPort(ip, port string) error {
