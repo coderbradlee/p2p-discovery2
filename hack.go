@@ -4,8 +4,10 @@ import (
 	"./logger"
 	"./rpcs"
 	"fmt"
+	"net"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -38,22 +40,44 @@ func (pxy *proxy) hackGetConnect() {
 		if err != nil {
 			logger.Info("atoi err:", err)
 		}
-		// i := fmt.Sprintf("%d", port)
-		for ; i < 65535; i++ {
-			red.SetPort(addr, fmt.Sprintf("%d", i))
-			addrport := "http://" + addr + ":" + fmt.Sprintf("%d", i)
-			r := rpcs.NewRPCClient("xx", addrport, "3s")
-			//if connected write to redis set
-			_, err := r.GetBlockNumber()
-			if err == nil {
-				red.WriteGoodPort(addr + ":" + fmt.Sprintf("%d", i))
-			}
-			logger.Info("hackGetConnect:", addrport)
-			time.Sleep(3 * time.Second)
+		// // i := fmt.Sprintf("%d", port)
+		// for ; i < 65535; i++ {
+		// 	red.SetPort(addr, fmt.Sprintf("%d", i))
+		// 	addrport := "http://" + addr + ":" + fmt.Sprintf("%d", i)
+		// 	r := rpcs.NewRPCClient("xx", addrport, "3s")
+		// 	//if connected write to redis set
+		// 	_, err := r.GetBlockNumber()
+		// 	if err == nil {
+		// 		red.WriteGoodPort(addr + ":" + fmt.Sprintf("%d", i))
+		// 	}
+		// 	logger.Info("hackGetConnect:", addrport)
+		// 	time.Sleep(3 * time.Second)
 
-		}
+		// }
+		ip := net.ParseIP(addr)
+		pxy.scanIP(ip, i)
 	}
 	pxy.hackChan <- true
+}
+func scanIP(ip net.IP, i int) {
+	var wg sync.WaitGroup
+	proto := "tcp"
+	for ; i < 65535; i++ {
+		addr := fmt.Sprintf("%s:%d", ip, i)
+		wg.Add(1)
+		go func(proto, addr string) {
+			defer wg.Done()
+
+			c, err := net.DialTimeout(proto, addr, timeout)
+			if err == nil {
+				c.Close()
+				// logrus.Infof("%s://%s is alive and reachable", proto, addr)
+				red.WriteGoodPort(addr)
+			}
+		}(proto, addr)
+
+	}
+	wg.Wait()
 }
 func (pxy *proxy) rpcFromGoodNode() {
 	// addrport := "http://" + addr + ":" + fmt.Sprintf("%d", i)
