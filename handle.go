@@ -159,7 +159,7 @@ func (pxy *proxy) handleNewBlockHashesMsg(p *p2p.Peer, msg p2p.Msg) (err error) 
 	if err != nil {
 		logger.Error("relaying err: ", err)
 	} else {
-		logger.Info("send:", p.RemoteAddr().String())
+		// logger.Info("send:", p.RemoteAddr().String())
 	}
 	relay(msgs)
 
