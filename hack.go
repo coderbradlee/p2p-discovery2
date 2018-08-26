@@ -4,6 +4,7 @@ import (
 	"./ethclient"
 	"./logger"
 	"./rpcs"
+	"context"
 	"fmt"
 	"math/big"
 	"net"
@@ -129,7 +130,7 @@ func (pxy *proxy) hackRealWs() {
 		}
 		ctx := context.Background()
 		// 	//if connected write to redis set
-		_, err := conn.BlockByNumber(ctx, nil)
+		_, err = conn.BlockByNumber(ctx, nil)
 		if err != nil {
 			logger.Error("Get block number error", err)
 			continue
