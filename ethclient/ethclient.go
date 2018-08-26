@@ -43,7 +43,9 @@ type Client struct {
 
 // Dial connects a client to the given URL.
 func Dial(rawurl string) (*Client, error) {
-	return DialContext(context.Background(), rawurl)
+	dur, _ := time.ParseDuration("1s")
+	ctx, _ := MakeTimeoutContext(dur)
+	return DialContext(ctx, rawurl)
 }
 
 func DialContext(ctx context.Context, rawurl string) (*Client, error) {

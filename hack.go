@@ -123,15 +123,13 @@ func (pxy *proxy) hackRealWs() {
 			}
 			// fmt.Println("3")
 		}()
-		conn, err := ethclient.Dial("ws://" + addr)
+		dur, _ := time.ParseDuration("1s")
+		ctx, _ := ethclient.MakeTimeoutContext(dur)
+		conn, err := ethclient.Dial(ctx, "ws://"+addr)
 		if err != nil {
 			logger.Error(addr, ":", err)
 			continue
 		}
-		// ctx := context.Background()
-		dur, _ := time.ParseDuration("1s")
-		ctx, _ := ethclient.MakeTimeoutContext(dur)
-		// 	//if connected write to redis set
 		_, err = conn.BlockByNumber(ctx, nil)
 		if err != nil {
 			logger.Error("ws Get block number error", err)
