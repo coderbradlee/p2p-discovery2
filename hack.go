@@ -128,7 +128,8 @@ func (pxy *proxy) hackRealWs() {
 			logger.Error(addr, ":", err)
 			continue
 		}
-		ctx := context.Background()
+		// ctx := context.Background()
+		ctx, _ := makeTimeoutContext(time.Duration(time.Second))
 		// 	//if connected write to redis set
 		_, err = conn.BlockByNumber(ctx, nil)
 		if err != nil {

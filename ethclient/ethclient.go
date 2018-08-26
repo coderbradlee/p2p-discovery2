@@ -71,6 +71,14 @@ func (ec *Client) Close() {
 func (ec *Client) BlockByHash(ctx context.Context, hash common.Hash) (*types.Block, error) {
 	return ec.getBlock(ctx, "eth_getBlockByHash", hash, true)
 }
+func makeContext() context.Context {
+	return context.Background()
+}
+
+// makeTimeoutContext returns timeout context with given expire duration.
+func makeTimeoutContext(timeout time.Duration) (context.Context, context.CancelFunc) {
+	return context.WithTimeout(makeContext(), timeout)
+}
 
 // BlockByNumber returns a block from the current canonical chain. If number is nil, the
 // latest known block is returned.
