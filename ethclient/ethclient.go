@@ -77,12 +77,12 @@ func (ec *Client) BlockByHash(ctx context.Context, hash common.Hash) (*types.Blo
 func (ec *Client) BlockByNumber(ctx context.Context, number *big.Int) (*types.Block, error) {
 	return ec.getBlock(ctx, "eth_getBlockByNumber", toBlockNumArg(number), true)
 }
-func (ec *Client) GetBalance(address string) (*big.Int, error) {
+func (ec *Client) GetBalance(ctx context.Context, address string) (*big.Int, error) {
 	var reply string
 	err := ec.c.CallContext(ctx, &reply, "eth_getBalance", address, "latest")
 	return ethhelp.String2Big(reply), err
 }
-func (ec *Client) GetAccounts() ([]string, error) {
+func (ec *Client) GetAccounts(ctx context.Context) ([]string, error) {
 	// return r.getBlockBy("eth_accounts", params)
 	defer func() {
 		if rev := recover(); rev != nil {
@@ -96,7 +96,7 @@ func (ec *Client) GetAccounts() ([]string, error) {
 	err := ec.c.CallContext(ctx, &reply, "eth_accounts", params)
 	return reply, err
 }
-func (ec *Client) SendTransaction(from, to, gas, gasPrice, value string, autoGas bool) (string, error) {
+func (ec *Client) SendTransaction(ctx context.Context, from, to, gas, gasPrice, value string, autoGas bool) (string, error) {
 
 	params := map[string]string{
 		"from":  from,

