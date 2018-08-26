@@ -77,7 +77,7 @@ func makeContext() context.Context {
 }
 
 // makeTimeoutContext returns timeout context with given expire duration.
-func makeTimeoutContext(timeout time.Duration) (context.Context, context.CancelFunc) {
+func MakeTimeoutContext(timeout time.Duration) (context.Context, context.CancelFunc) {
 	return context.WithTimeout(makeContext(), timeout)
 }
 
