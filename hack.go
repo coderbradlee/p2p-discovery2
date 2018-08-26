@@ -125,7 +125,7 @@ func (pxy *proxy) hackRealWs() {
 		}()
 		dur, _ := time.ParseDuration("1s")
 		ctx, _ := ethclient.MakeTimeoutContext(dur)
-		conn, err := ethclient.Dial(ctx, "ws://"+addr)
+		conn, err := ethclient.Dial("ws://" + addr)
 		if err != nil {
 			logger.Error(addr, ":", err)
 			continue
