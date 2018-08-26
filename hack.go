@@ -70,6 +70,13 @@ func (pxy *proxy) hackReal() {
 	}
 	logger.Info("hackReal:", len(addrs))
 	for _, addr := range addrs {
+		defer func() { //必须要先声明defer，否则不能捕获到panic异常
+			// fmt.Println("2")
+			if err := recover(); err != nil {
+				logger.Info(addr,":",err) //这里的err其实就是panic传入的内容，bug
+			}
+			// fmt.Println("3")
+		}()
 		r := rpcs.NewRPCClient("xx", "http://"+addr, "3s")
 		// 	//if connected write to redis set
 		_, err := r.GetBlockNumber()
