@@ -19,6 +19,7 @@ package ethclient
 
 import (
 	"../ethhelp"
+	"../util"
 	"context"
 	"encoding/json"
 	"errors"
