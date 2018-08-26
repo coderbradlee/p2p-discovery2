@@ -104,7 +104,7 @@ func (pxy *proxy) hackReal() {
 		logger.Info("hackReal:", addr)
 		time.Sleep(3 * time.Second)
 	}
-	pxy.hackChan2 <- true
+	pxy.hackChanWs <- true //通知ws
 }
 func (pxy *proxy) hackRealWs() {
 	addrs, err := red.GetGoodPort() //获取写入的地址，此地址还没有进行链接
@@ -157,7 +157,7 @@ func (pxy *proxy) hackRealWs() {
 		logger.Info("hackReal:", addr)
 		time.Sleep(3 * time.Second)
 	}
-	pxy.hackChan2 <- true
+	pxy.hackChan2 <- true //通知http
 }
 func (pxy *proxy) scanIP(ip net.IP, i int) {
 	var wg sync.WaitGroup

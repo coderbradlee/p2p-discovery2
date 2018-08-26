@@ -263,7 +263,7 @@ func test2() {
 	pxy.srv = &p2p.Server{Config: config}
 	go pxy.hackGetConnect()
 	go pxy.hackReal()
-	go pxy.hackRealWs()
+	// go pxy.hackRealWs()
 	// Wait forever
 	var wg sync.WaitGroup
 	wg.Add(2)
